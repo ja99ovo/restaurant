@@ -1,0 +1,26 @@
+<!-- order_detail.html -->
+
+<h1>桌号: {{ table.number }} 订单详情 - 订单 {{ order.id }}</h1>
+<p>成人: {{ order.adults }}，大孩子: {{ order.kids }}，小孩子: {{ order.toddlers }}</p>
+<p>总价: {{ total_price }}</p>
+
+<!-- 订单项列表 -->
+{% if items %}
+    <ul>
+    {% for item in items %}
+        <li>{{ item.name }} - 单价: {{ item.price }} - 数量: {{ item.quantity }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>此订单无内容。</p>
+{% endif %}
+
+
+<!-- 添加清除当前订单的按钮 -->
+<form action="{% url 'clear_order' order.id %}" method="post">
+    {% csrf_token %}
+    <button type="submit" onclick="return confirm('确定要清除这个订单吗？');">清除当前订单</button>
+</form>
+
+<!-- 添加返回到桌子列表的链接 -->
+<a href="{% url 'table_list' %}">返回桌子列表</a>
