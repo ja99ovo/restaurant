@@ -1,6 +1,6 @@
 from .models import tables, orders, OrderItem,Boisson,table_order
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import UserForm
+
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
@@ -34,7 +34,7 @@ def cashier_summary(request):
 
 def add_order_item(request):
     if request.method == 'POST':
-        form =UserForm(request.POST)       
+        form =UserForm(request.POST) 
         if form.is_valid():
             pass
     return render(request, 'restaurant/add_order_item', {'form':form})
