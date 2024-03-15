@@ -7,9 +7,6 @@
     {% for table in tables %}
         <li>
             桌号: {{ table.id }}
-            
-            
-            
             <!-- 提供查看订单的链接 -->
             {% if table.active %}
                 <a href="{% url 'order_detail' table.id %}">查看订单: {{table.active_id}}</a>
@@ -20,7 +17,7 @@
     {% endfor %}
     </ul>
 {% else %}
-    <p>目前没有桌子，请添加桌子。</p>
+    <p>目前没有桌子，请添加桌子 1111。</p>
 {% endif %}
 
 <script>
