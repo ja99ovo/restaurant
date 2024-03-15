@@ -2,8 +2,7 @@
 
     <!-- 人数添加区域 -->
 
-    <form method="post">
-        {% csrf_token %}
+    
 
     <div>
         <h3>人数</h3>
@@ -18,9 +17,9 @@
         <button type="button" onclick="decrement('toddlers')">小孩子 -1</button>
 
 
-        <input type="hidden" id="adults" name="adults" value="0">
+        {% comment %} <input type="hidden" id="adults" name="adults" value="0">
         <input type="hidden" id="kids" name="kids" value="0">    
-        <input type="hidden" id="toddlers" name="toddlers" value="0">
+        <input type="hidden" id="toddlers" name="toddlers" value="0"> {% endcomment %}
     </div>
     <div>
         <h3>酒水</h3>
@@ -32,7 +31,7 @@
             
             <button type="button" onclick="increment('boisson_{{boisson.name}}')">加</button>
             <button type="button" onclick="decrement('boisson_{{boisson.name}}')">减</button>
-            <input type="hidden" id="boisson_{{boisson.name}}" name="boisson_{{boisson.name}}" value="0">
+            {% comment %} <input type="hidden" id="boisson_{{boisson.name}}" name="boisson_{{boisson.name}}" value="0"> {% endcomment %}
         </li>   
 
     {% endfor %}
@@ -40,31 +39,28 @@
 
     </div>
     
+<form method="post">
+{% csrf_token %}
 
+{{ form }}
 
-
-
-<button type="submit">提交更新</button>
+<button type="submit">提交</button>
 
 </form> 
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">提交</button>
-</form>
+
 
 <script>
     function increment(id) {
         var display_input = document.getElementById("display_" +id);
-        var input = document.getElementById(id);
+        var input = document.getElementById("id_"+id);
         display_input.innerText = parseInt(display_input.innerText) + 1;
         input.value=parseInt(input.value)+1;
         console.log(input.value);
     }
 
     function decrement(id) {
-        var input = document.getElementById(id);
+        var input = document.getElementById("id_"+id);
         var display_input = document.getElementById("display_" +id);
         if (parseInt(input.value) > 0) {
             input.value = parseInt(input.value) - 1;
