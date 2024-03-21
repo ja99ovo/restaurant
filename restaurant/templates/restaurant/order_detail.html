@@ -1,26 +1,48 @@
-<!-- order_detail.html -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>查看订单</title>
+    <style>
+        .order-container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
 
-<h1>桌号: {{ table.number }} 订单详情 - 订单 {{ order.id }}</h1>
-<p>成人: {{ order.adults }}，大孩子: {{ order.kids }}，小孩子: {{ order.toddlers }}</p>
-<p>总价: {{ total_price }}</p>
+        .order-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
 
-<!-- 订单项列表 -->
-{% if items %}
-    <ul>
-    {% for item in items %}
-        <li>{{ item.name }} - 单价: {{ item.price }} - 数量: {{ item.quantity }}</li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>此订单无内容。</p>
-{% endif %}
+        .order-item:last-child {
+            border-bottom: none;
+        }
 
+        .order-total {
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="order-container">
+        <h2>订单详情</h2>
 
-<!-- 添加清除当前订单的按钮 -->
-<form action="{% url 'clear_order' order.id %}" method="post">
-    {% csrf_token %}
-    <button type="submit" onclick="return confirm('确定要清除这个订单吗？');">清除当前订单</button>
-</form>
+        {% for item in order_items %}
+        <div class="order-item">
+            <span>商品名称: {{ item.name }}</span><br>
+            <span>数量: {{ item.quantity }}</span><br>
+            <span>价格: {{ item.price }}</span>
+        </div>
+        {% endfor %}
 
-<!-- 添加返回到桌子列表的链接 -->
-<a href="{% url 'table_list' %}">返回桌子列表</a>
+        <div class="order-total">
+            总计: {{ order_total }}
+        </div>
+    </div>
+
+</body>
+</html>
