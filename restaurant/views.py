@@ -1,7 +1,7 @@
 from .models import tables, orders, OrderItem,Boisson,table_order
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import New_order_form
-
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -14,16 +14,32 @@ def table_list(request):
         t.active_id=active_order.related_order_id if t.active else None
     return render(request, 'restaurant/table_list.html', {'tables': table_list})
 
+def add_table(request):
+    if request.method == 'POST':
+        # 在这里处理添加新桌子的逻辑
+        new_table = tables()  # 假设 'tables' 是你的桌子模型
+        new_table.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
 
 def table_detail(request, table_id):
     pass
 
-def order_detail(request, table_id):
-    table_order_list = table_order.objects.all()
-    active_order=table_order_list.filter(related_table_id=table_id)
-    return render(request, 'restaurant/table_list.html', {'id_order': active_order})
+def order_detail(request, order_id):
+    # 假设 table_order 模型关联到了订单和桌子
+    order = get_object_or_404(table_order, id=order_id)
 
+    # 假设 OrderItem 包含了订单中的项目信息
+    items = OrderItem.objects.filter(order=order)
 
+    # 计算订单总额
+    total = sum(item.boisson.prix * item.quantity for item in items)
+
+    return render(request, 'restaurant/order_detail.html', {
+        'order': order,
+        'items': items,
+        'total': total
+    })
 
 
 def cashier_summary(request):
