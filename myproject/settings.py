@@ -90,8 +90,8 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'a',
-        #'HOST': 'localhost',  # 通常是 'localhost' 或者是 PostgreSQL 服务器的 IP 地址
-        'HOST': 'db',  # 使用服务名称
+        'HOST': 'localhost',  # 通常是 'localhost' 或者是 PostgreSQL 服务器的 IP 地址
+        #'HOST': 'db',  # 使用服务名称
         'PORT': '5432',  # PostgreSQL 的默认端口是 5432
     }
 }
