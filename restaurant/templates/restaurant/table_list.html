@@ -35,11 +35,8 @@ function confirmClearOrders() {
     {% for table in tables %}
         <li>
             桌号: {{ table.id }}
-            <!-- 提供查看订单的链接 -->
             {% if table.active %}
-                <a href="{% url 'order_detail' table.id %}">查看订单: {{table.active_id}}</a>
-                <!-- 提供添加订单的链接 -->
-                <a href="{% url 'add_order_item' %}?table_id={{ table.id }}">添加订单</a>
+                <a href="{% url 'order_detail' %}?table_id={{ table.id }}">查看订单: {{table.active_id}}</a>
             {% else %}
                 <a href="{% url 'add_order_item' %}?table_id={{ table.id }}">创建新订单</a>
             {% endif %}

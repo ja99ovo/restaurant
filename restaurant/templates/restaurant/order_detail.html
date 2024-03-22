@@ -1,48 +1,96 @@
 <!DOCTYPE html>
 <html lang="zh">
-<head>
-    <meta charset="UTF-8">
-    <title>查看订单</title>
-    <style>
-        .order-container {
-            width: 80%;
-            margin: 20px auto;
-            padding: 15px;
-            border: 1px solid #ddd;
-        }
-
-        .order-item {
-            border-bottom: 1px solid #eee;
-            padding: 10px 0;
-        }
-
-        .order-item:last-child {
-            border-bottom: none;
-        }
-
-        .order-total {
-            font-weight: bold;
-            text-align: right;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="order-container">
-        <h2>订单详情</h2>
-
-        {% for item in order_items %}
-        <div class="order-item">
-            <span>商品名称: {{ item.name }}</span><br>
-            <span>数量: {{ item.quantity }}</span><br>
-            <span>价格: {{ item.price }}</span>
+    <head>
+        <meta charset="UTF-8">
+        <title>添加订单</title>
+        <style>
+            .container {
+                display: flex;
+                justify-content: space-around;
+                margin: 20px;
+            }
+    
+            .section {
+                flex: 1;
+                padding: 10px;
+                margin: 5px;
+                border: 1px solid #ddd;
+            }
+    
+            .section h1 {
+                display: inline-block;
+                margin: 5px;
+            }
+    
+            .section button {
+                margin: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="section people">
+                <h3>人数</h3>
+                <div>
+                    <h1 >大</h1><h1 id="display_adults"> {{ adults }}</h1>
+                    <button type="button" onclick="increment('adults')">成人 +1</button>
+                    <button type="button" onclick="decrement('adults')">成人 -1</button>
+                </div>
+                <div>
+                    <h1 >中</h1><h1 id="display_kids">{{ kids }}</h1>
+                    <button type="button" onclick="increment('kids')">大孩子 +1</button>
+                    <button type="button" onclick="decrement('kids')">大孩子 -1</button>
+                </div>
+                <div>
+                    <h1 >小</h1><h1 id="display_toddlers">{{ toddlers }}</h1>
+                    <button type="button" onclick="increment('toddlers')">小孩子 +1</button>
+                    <button type="button" onclick="decrement('toddlers')">小孩子 -1</button>
+                </div>
+            </div>
+    
+            <div class="section drinks">
+                <h3>酒水</h3>
+                <ul>
+                    {% for boisson in boissons %}
+                        <li>
+                            饮料: {{ boisson.name }}
+                            量：<h1 id="display_boisson_{{boisson.name}}">{{boisson.quantity}}</h1>
+                            <button type="button" onclick="increment('boisson_{{boisson.name}}')">加</button>
+                            <button type="button" onclick="decrement('boisson_{{boisson.name}}')">减</button>
+                        </li>   
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
-        {% endfor %}
-
-        <div class="order-total">
-            总计: {{ order_total }}
-        </div>
-    </div>
-
-</body>
+        
+        <form method="post">
+            {% csrf_token %}
+            {{ form }}
+            <button type="submit">提交更新</button>
+        </form>
+    
+        <script>
+            document.getElementById("id_adults").value={{ adults }}
+            document.getElementById("id_kids").value={{ kids }}
+            document.getElementById("id_toddlers").value={{ toddlers }}
+            {% for boisson in boissons %}
+            document.getElementById("id_boisson_"+'{{ boisson.name }}').value={{ boisson.quantity }}
+            {% endfor %}
+            function increment(id) {
+                var display_input = document.getElementById("display_" +id);
+                var input = document.getElementById("id_"+id);
+                display_input.innerText = parseInt(display_input.innerText) + 1;
+                input.value=parseInt(input.value)+1;
+            }
+    
+            function decrement(id) {
+                var input = document.getElementById("id_"+id);
+                var display_input = document.getElementById("display_" +id);
+                if (parseInt(input.value) > 0) {
+                    input.value = parseInt(input.value) - 1;
+                    display_input.innerText = parseInt(display_input.innerText) - 1;
+                }
+            }
+        </script>
+    </body>
 </html>
