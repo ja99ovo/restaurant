@@ -83,3 +83,17 @@ def clear_orders(request):
     pass
 def clear_order(request, order_id):
     pass
+
+def login_view(request):
+    # 如果是POST请求，处理登录逻辑
+    if request.method == 'POST':
+        # 从request.POST中获取用户名和密码
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        # 这里添加用户验证逻辑
+        # ...
+        # 验证成功后重定向或返回响应
+        # ...
+    # 如果不是POST请求，显示登录页面
+    else:
+        return render(request, 'login.html')
