@@ -28,6 +28,7 @@
         </style>
     </head>
     <body>
+        <h1> id: {{ order_id }}  </h1>
         <div class="container">
             <div class="section people">
                 <h3>人数</h3>
@@ -69,6 +70,12 @@
             <button type="submit">提交更新</button>
         </form>
     
+        <form method="post">
+            {% csrf_token %}
+            {{ form_addition }}
+            <button type="submit">结算</button>
+        </form>
+
         <script>
             document.getElementById("id_adults").value={{ adults }}
             document.getElementById("id_kids").value={{ kids }}

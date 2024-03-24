@@ -8,9 +8,5 @@ urlpatterns = [
     path('add_table/', views.add_table, name='add_table'),
     path('table/<int:table_id>/add_order_item/<int:order_id>/', views.add_order_item, name='add_order_item_with_order'),
     
-    path('order_detail/', views.order_detail, name='order_detail'),
-    
-    path('cashier/', views.cashier_summary, name='cashier_summary'),
-    path('clear_orders/', views.clear_orders, name='clear_orders'),
-    path('order/clear/<int:order_id>/', views.clear_order, name='clear_order'),
+    path('order_detail/', views.order_detail, name='order_detail')
 ]

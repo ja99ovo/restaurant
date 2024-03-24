@@ -36,7 +36,7 @@ function confirmClearOrders() {
         <li>
             桌号: {{ table.id }}
             {% if table.active %}
-                <a href="{% url 'order_detail' %}?table_id={{ table.id }}">查看订单: {{table.active_id}}</a>
+                <a href="{% url 'order_detail' %}?table_id={{ table.id }}">查看订单: {{table.active}}</a>
             {% else %}
                 <a href="{% url 'add_order_item' %}?table_id={{ table.id }}">创建新订单</a>
             {% endif %}
@@ -50,7 +50,7 @@ function confirmClearOrders() {
 <script>
 function confirmClearOrders() {
     if (confirm("确定要清空所有订单吗？这将删除所有订单的数据。")) {
-        window.location.href = "{% url 'clear_orders' %}";
+        
     }
 }
 </script>

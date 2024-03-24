@@ -1,4 +1,4 @@
-from .models import tables, orders, OrderItem,Boisson,table_order
+from .models import Table, Order, Order_item,Boisson
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import New_order_form, Change_order_form
 from django.http import JsonResponse
@@ -7,17 +7,16 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 def table_list(request):
-    table_list = tables.objects.all()
+    table_list = Table.objects.all()
     for t in table_list:
-        order_active=table_order.objects.filter(related_table_id=t.id,status='Active').first()
-        t.active=table_order.objects.filter(related_table_id=t.id,status='Active').exists()
-        t.active_id=order_active.related_order_id if t.active else None
+        order_active=t.orders.all().filter(status='Active').first()
+        t.active=order_active.id if order_active else None
     return render(request, 'restaurant/table_list.html', {'tables': table_list})
 
 def add_table(request):
     if request.method == 'POST':
         # 在这里处理添加新桌子的逻辑
-        new_table = tables()  # 假设 'tables' 是你的桌子模型
+        new_table = Table()  # 假设 'tables' 是你的桌子模型
         new_table.save()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
@@ -28,12 +27,9 @@ def table_detail(request, table_id):
 def order_detail(request):
     table_id = request.GET.get('table_id')
     boissons=Boisson.objects.all()
-    table_obj=tables.objects.get(id=table_id)
     
-    order_id=table_order.objects.filter(related_table_id=table_id,status='Active').values_list(
-            'related_order_id',flat=True).first()
-    order_obj=orders.objects.filter(id=order_id).first()
-    boisson_ordered=OrderItem.objects.filter(order_id=order_id).all()
+    order_obj=Table.objects.get(id=table_id).orders.all().filter(status='Active').first()
+    boisson_ordered=Order_item.objects.filter(order_id=order_obj.id).all()
     if request.method == 'POST':
         form = Change_order_form(request.POST)
         if form.is_valid():
@@ -59,7 +55,8 @@ def order_detail(request):
         'kids':order_obj.kids,
         'toddlers':order_obj.toddlers,
         'form':form,
-        'boissons': boissons
+        'boissons': boissons,
+        'order_id':order_obj.id
     })
 
 
@@ -69,7 +66,7 @@ def cashier_summary(request):
 def add_order_item(request):
     boissons=Boisson.objects.all()
     table_id = request.GET.get('table_id')
-    table_this=tables.objects.get(id=table_id)
+    table_this=Table.objects.get(id=table_id)
     if request.method == 'POST':
         form =New_order_form(request.POST)
         
@@ -79,18 +76,17 @@ def add_order_item(request):
             kids=form.cleaned_data.get('kids')
             
                 
-            new_order=orders(adults=adults,kids=kids,toddlers=toddlers)
+            new_order=Order(adults=adults,kids=kids,toddlers=toddlers,table=table_this)
             new_order.save()
-            new_table_order=table_order(status='Active',related_order=new_order,related_table=table_this)
-            new_table_order.save()
+
             for b in boissons:
                 quantity=form.cleaned_data.get(f'boisson_{b.name}')
-                new_order_item=OrderItem(quantity=quantity,boisson=b,order=new_order)
+                new_order_item=Order_item(quantity=quantity,boisson=b,order=new_order)
                 new_order_item.save()
                 
             #重定向到订单修改页面
             new_form=Change_order_form()
-            boisson_ordered=OrderItem.objects.filter(order=new_order).all()
+            boisson_ordered=Order_item.objects.filter(order=new_order).all()
             for b in boissons:
                 b.quantity = boisson_ordered.filter(boisson_id=b.id).values_list("quantity",flat=True).first() if boisson_ordered.filter(boisson_id=b.id).exists() else 0
             return render(request, 'restaurant/order_detail.html', {
@@ -98,7 +94,8 @@ def add_order_item(request):
                 'kids':kids,
                 'toddlers':toddlers,
                 'form':new_form,
-                'boissons': boissons
+                'boissons': boissons,
+                'order': new_order
             })
         else:
             print("not valid")
@@ -108,9 +105,4 @@ def add_order_item(request):
 
 
 def cashier_summary(request):
-    pass
-
-def clear_orders(request):
-    pass
-def clear_order(request, order_id):
     pass
