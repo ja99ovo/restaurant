@@ -30,6 +30,9 @@ def order_detail(request):
     
     order_obj=Table.objects.get(id=table_id).orders.all().filter(status='Active').first()
     boisson_ordered=Order_item.objects.filter(order_id=order_obj.id).all()
+    
+    
+    
     if request.method == 'POST':
         form = Change_order_form(request.POST)
         if form.is_valid():
@@ -56,7 +59,7 @@ def order_detail(request):
         'toddlers':order_obj.toddlers,
         'form':form,
         'boissons': boissons,
-        'order_id':order_obj.id
+        'order':order_obj,
     })
 
 
@@ -75,15 +78,20 @@ def add_order_item(request):
             toddlers=form.cleaned_data.get('toddlers')
             kids=form.cleaned_data.get('kids')
             
-                
             new_order=Order(adults=adults,kids=kids,toddlers=toddlers,table=table_this)
             new_order.save()
 
+            prix_boisson=0
             for b in boissons:
                 quantity=form.cleaned_data.get(f'boisson_{b.name}')
-                new_order_item=Order_item(quantity=quantity,boisson=b,order=new_order)
-                new_order_item.save()
-                
+                if quantity:
+                    new_order_item=Order_item(quantity=quantity,boisson=b,order=new_order)
+                    prix_boisson+=b.prix*int(quantity)
+                    new_order_item.save()
+            prix_person=adults*3+kids*2+toddlers
+            prix_total=prix_person+prix_boisson
+            new_order.prix=prix_total
+            new_order.save()
             #重定向到订单修改页面
             new_form=Change_order_form()
             boisson_ordered=Order_item.objects.filter(order=new_order).all()

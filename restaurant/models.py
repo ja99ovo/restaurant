@@ -17,7 +17,7 @@ class Order(models.Model):
     kids = models.IntegerField(default=0)    # 大孩子数量
     toddlers = models.IntegerField(default=0) # 小孩子数量
     status = models.CharField(max_length=50,default='Active')
-    
+    prix=models.IntegerField(null=True)
 
 class Order_item(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
