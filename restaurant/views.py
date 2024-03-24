@@ -45,13 +45,20 @@ def order_detail(request):
             order_obj.save()
             
         for b in boissons:
+            prix_boisson=0
             quantity=form.cleaned_data.get(f'boisson_{b.name}')
-            b_old=boisson_ordered.filter(boisson=b).all().first()
-            b_old.quantity=quantity
-            b_old.save()
-            
+            if quantity:
+                b_old=boisson_ordered.filter(boisson=b).all().first()
+                prix_boisson+=b.prix*int(quantity)
+                b_old.quantity=quantity
+                b_old.save()
+        prix_person=adults*3+kids*2+toddlers
+        prix_total=prix_boisson+prix_person
+        order_obj.prix=prix_total
+        order_obj.save()
     form = Change_order_form()
     for b in boissons:
+        
         b.quantity = boisson_ordered.filter(boisson_id=b.id).values_list("quantity",flat=True).first() if boisson_ordered.filter(boisson_id=b.id).exists() else 0
     return render(request, 'restaurant/order_detail.html', {
         'adults':order_obj.adults,
