@@ -1,0 +1,60 @@
+
+{% extends "base.html" %}
+{% block content %}
+<h1>桌子列表</h1>
+
+<button onclick="addNewTable()">添加新桌子</button>
+<!-- 清空所有订单的按钮 -->
+<button onclick="confirmClearOrders()">清空所有订单</button>
+
+<script>
+function addNewTable() {
+    // 发送一个请求到后端以添加新桌子
+    fetch('{% url "add_table" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 'action': 'add' }) // 可以发送更多信息，如果你的表中有其他字段
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success){
+            window.location.reload(); // 如果添加成功，重新加载页面
+        } else {
+            alert("添加桌子失败");
+        }
+    });
+}
+
+function confirmClearOrders() {
+
+}
+</script>
+
+{% if tables %}
+    <ul>
+    {% for table in tables %}
+        <li>
+            桌号: {{ table.id }}
+            {% if table.active %}
+                <a href="{% url 'order_detail' %}?table_id={{ table.id }}">查看订单: {{table.active}}</a>
+            {% else %}
+                <a href="{% url 'add_order_item' %}?table_id={{ table.id }}">创建新订单</a>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>目前没有桌子，请添加桌子。</p>
+{% endif %}
+
+<script>
+function confirmClearOrders() {
+    if (confirm("确定要清空所有订单吗？这将删除所有订单的数据。")) {
+        
+    }
+}
+</script>
+{% endblock %}

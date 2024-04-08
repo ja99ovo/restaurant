@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+    <head>
+        <meta charset="UTF-8">
+        <title>添加订单</title>
+        <style>
+            .container {
+                display: flex;
+                justify-content: space-around;
+                margin: 20px;
+            }
+    
+            .section {
+                flex: 1;
+                padding: 10px;
+                margin: 5px;
+                border: 1px solid #ddd;
+            }
+    
+            .section h1 {
+                display: inline-block;
+                margin: 5px;
+            }
+    
+            .section button {
+                margin: 5px;
+            }
+        </style>
+    </head>
+
+{% extends "base.html" %}
+{% block content %}
+    <body>
+        <h1> id: {{ order.id }}  </h1>
+        <h1> prix: {{ order.prix }}  </h1>
+        <div class="container">
+            <div class="section people">
+                <h3>人数</h3>
+                <div>
+                    <h1 >大</h1><h1 id="display_adults"> {{ adults }}</h1>
+                    <button type="button" onclick="increment('adults')">成人 +1</button>
+                    <button type="button" onclick="decrement('adults')">成人 -1</button>
+                </div>
+                <div>
+                    <h1 >中</h1><h1 id="display_kids">{{ kids }}</h1>
+                    <button type="button" onclick="increment('kids')">大孩子 +1</button>
+                    <button type="button" onclick="decrement('kids')">大孩子 -1</button>
+                </div>
+                <div>
+                    <h1 >小</h1><h1 id="display_toddlers">{{ toddlers }}</h1>
+                    <button type="button" onclick="increment('toddlers')">小孩子 +1</button>
+                    <button type="button" onclick="decrement('toddlers')">小孩子 -1</button>
+                </div>
+            </div>
+    
+            <div class="section drinks">
+                <h3>酒水</h3>
+                <ul>
+                    {% for boisson in boissons %}
+                        <li>
+                            饮料: {{ boisson.name }}
+                            量：<h1 id="display_boisson_{{boisson.name}}">{{boisson.quantity}}</h1>
+                            <button type="button" onclick="increment('boisson_{{boisson.name}}')">加</button>
+                            <button type="button" onclick="decrement('boisson_{{boisson.name}}')">减</button>
+                        </li>   
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            {{ form }}
+            <button type="submit">提交更新</button>
+        </form>
+    
+        <form method="post">
+            {% csrf_token %}
+            {{ form_addition }}
+            <button type="submit">结算</button>
+        </form>
+
+        <script>
+            document.getElementById("id_adults").value={{ adults }}
+            document.getElementById("id_kids").value={{ kids }}
+            document.getElementById("id_toddlers").value={{ toddlers }}
+            {% for boisson in boissons %}
+            document.getElementById("id_boisson_"+'{{ boisson.name }}').value={{ boisson.quantity }}
+            {% endfor %}
+            function increment(id) {
+                var display_input = document.getElementById("display_" +id);
+                var input = document.getElementById("id_"+id);
+                display_input.innerText = parseInt(display_input.innerText) + 1;
+                input.value=parseInt(input.value)+1;
+            }
+    
+            function decrement(id) {
+                var input = document.getElementById("id_"+id);
+                var display_input = document.getElementById("display_" +id);
+                if (parseInt(input.value) > 0) {
+                    input.value = parseInt(input.value) - 1;
+                    display_input.innerText = parseInt(display_input.innerText) - 1;
+                }
+            }
+        </script>
+    </body>
+
+    {% endblock %}
+</html>

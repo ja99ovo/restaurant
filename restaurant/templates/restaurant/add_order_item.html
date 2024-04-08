@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>添加订单</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px;
+        }
+
+        .section {
+            flex: 1;
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .section h1 {
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .section button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section people">
+            <h3>人数</h3>
+            <div>
+                <h1 >大</h1><h1 id="display_adults">0</h1>
+                <button type="button" onclick="increment('adults')">成人 +1</button>
+                <button type="button" onclick="decrement('adults')">成人 -1</button>
+            </div>
+            <div>
+                <h1 >中</h1><h1 id="display_kids">0</h1>
+                <button type="button" onclick="increment('kids')">大孩子 +1</button>
+                <button type="button" onclick="decrement('kids')">大孩子 -1</button>
+            </div>
+            <div>
+                <h1 >小</h1><h1 id="display_toddlers">0</h1>
+                <button type="button" onclick="increment('toddlers')">小孩子 +1</button>
+                <button type="button" onclick="decrement('toddlers')">小孩子 -1</button>
+            </div>
+        </div>
+
+        <div class="section drinks">
+            <h3>酒水</h3>
+            <ul>
+                {% for boisson in boissons %}
+                    <li>
+                        饮料: {{ boisson.name }}
+                        量：<h1 id="display_boisson_{{boisson.name}}">0</h1>
+                        <button type="button" onclick="increment('boisson_{{boisson.name}}')">加</button>
+                        <button type="button" onclick="decrement('boisson_{{boisson.name}}')">减</button>
+                    </li>   
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit">提交</button>
+    </form>
+
+    <script>
+        function increment(id) {
+            var display_input = document.getElementById("display_" +id);
+            var input = document.getElementById("id_"+id);
+            display_input.innerText = parseInt(display_input.innerText) + 1;
+            input.value=parseInt(input.value)+1;
+        }
+
+        function decrement(id) {
+            var input = document.getElementById("id_"+id);
+            var display_input = document.getElementById("display_" +id);
+            if (parseInt(input.value) > 0) {
+                input.value = parseInt(input.value) - 1;
+                display_input.innerText = parseInt(display_input.innerText) - 1;
+            }
+        }
+    </script>
+</body>
+</html>

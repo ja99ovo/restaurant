@@ -1,0 +1,7 @@
+<!-- restaurant/templates/restaurant/cashier_summary.html -->
+<h1>收银台总计</h1>
+<ul>
+{% for table_id, total in table_totals.items %}
+    <li>桌号 {{ table_id }} - 总计: {{ total }}</li>
+{% endfor %}
+</ul>
