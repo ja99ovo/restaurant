@@ -75,6 +75,20 @@
                 {% endfor %}
             </ul>
         </div>
+
+        <div class="section drinks aa">
+            <h3>COCKTAILS AA</h3>
+            <ul>
+                {% for boisson in boissons_aa %}
+                    <li>
+                        Nom: {{ boisson.name }}
+                        Nombre：<h1 id="display_boisson_{{boisson.name}}">0</h1>
+                        <button type="button" onclick="increment('boisson_{{boisson.name}}')">加Ajouter</button>
+                        <button type="button" onclick="decrement('boisson_{{boisson.name}}')">减Réduire</button>
+                    </li>   
+                {% endfor %}
+            </ul>
+        </div>
     </div>
     
     <form method="post">
