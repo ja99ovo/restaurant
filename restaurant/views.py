@@ -154,3 +154,20 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+@login_required(redirect_field_name="login")
+def clear_all_orders(request):
+    if request.method == 'POST':
+        # 获取所有订单
+        orders = Order.objects.all()
+
+        # 首先删除所有相关的订单项
+        for order in orders:
+            Order_item.objects.filter(order=order).delete()
+
+        # 然后删除所有订单
+        orders.delete()
+
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
