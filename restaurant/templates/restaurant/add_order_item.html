@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>添加订单</title>
+    <title>Ajouter une commande</title>
     <style>
         .container {
             display: flex;
@@ -30,33 +30,33 @@
 <body>
     <div class="container">
         <div class="section people">
-            <h3>人数</h3>
+            <h3>Nombre de personnes</h3>
             <div>
-                <h1 >大</h1><h1 id="display_adults">0</h1>
-                <button type="button" onclick="increment('adults')">成人 +1</button>
-                <button type="button" onclick="decrement('adults')">成人 -1</button>
+                <h1 >Adultes</h1><h1 id="display_adults">0</h1>
+                <button type="button" onclick="increment('adults')">Adultes +1</button>
+                <button type="button" onclick="decrement('adults')">Adultes -1</button>
             </div>
             <div>
-                <h1 >中</h1><h1 id="display_kids">0</h1>
-                <button type="button" onclick="increment('kids')">大孩子 +1</button>
-                <button type="button" onclick="decrement('kids')">大孩子 -1</button>
+                <h1 >Grands enfants</h1><h1 id="display_kids">0</h1>
+                <button type="button" onclick="increment('kids')">Grands enfants +1</button>
+                <button type="button" onclick="decrement('kids')">Grands enfants -1</button>
             </div>
             <div>
-                <h1 >小</h1><h1 id="display_toddlers">0</h1>
-                <button type="button" onclick="increment('toddlers')">小孩子 +1</button>
-                <button type="button" onclick="decrement('toddlers')">小孩子 -1</button>
+                <h1 >Petits enfants</h1><h1 id="display_toddlers">0</h1>
+                <button type="button" onclick="increment('toddlers')">Petits enfants +1</button>
+                <button type="button" onclick="decrement('toddlers')">Petits enfants -1</button>
             </div>
         </div>
 
         <div class="section drinks">
-            <h3>酒水</h3>
+            <h3>COCKTAILS SA</h3>
             <ul>
                 {% for boisson in boissons %}
                     <li>
-                        饮料: {{ boisson.name }}
-                        量：<h1 id="display_boisson_{{boisson.name}}">0</h1>
-                        <button type="button" onclick="increment('boisson_{{boisson.name}}')">加</button>
-                        <button type="button" onclick="decrement('boisson_{{boisson.name}}')">减</button>
+                        Nom: {{ boisson.name }}
+                        Nombre：<h1 id="display_boisson_{{boisson.name}}">0</h1>
+                        <button type="button" onclick="increment('boisson_{{boisson.name}}')">加Ajouter</button>
+                        <button type="button" onclick="decrement('boisson_{{boisson.name}}')">减Réduire</button>
                     </li>   
                 {% endfor %}
             </ul>
@@ -66,7 +66,7 @@
     <form method="post">
         {% csrf_token %}
         {{ form }}
-        <button type="submit">提交</button>
+        <button type="submit">提交Soumettre</button>
     </form>
 
     <script>
