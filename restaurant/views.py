@@ -31,70 +31,53 @@ def base(request):
     pass
 
 @login_required(redirect_field_name="login_view")
-def order_detail(request, table_id):  # 添加 table_id 参数
-    # 使用 table_id 从数据库中获取对应的 Table 对象
-    table = get_object_or_404(Table, id=table_id)
-    order = table.orders.filter(status='Active').first()
-
-    boissons_sa = Boisson.objects.filter(category__name='COCKTAILS SA')
-    boissons_aa = Boisson.objects.filter(category__name='COCKTAILS AA')
-
-    # 创建或获取一个 form 实例，这里假设 form 已经定义
-    form = Change_order_form(instance=order if order else None)
-
+def table_detail(request, table_id):
+    pass
+@login_required(redirect_field_name="login_view")
+def order_detail(request):
+    table_id = request.GET.get('table_id')
+    boissons=Boisson.objects.all()
+    
+    order_obj=Table.objects.get(id=table_id).orders.all().filter(status='Active').first()
+    boisson_ordered=Order_item.objects.filter(order_id=order_obj.id).all()
+    
+    
+    
     if request.method == 'POST':
         form = Change_order_form(request.POST)
         if form.is_valid():
-            adults = form.cleaned_data.get('adults')
-            kids = form.cleaned_data.get('kids')
-            toddlers = form.cleaned_data.get('toddlers')
-            if order:  # Ensure the order exists
-                order.adults = adults
-                order.kids = kids
-                order.toddlers = toddlers
-                order.save()
-
-                # Reset prix_boisson for this calculation
-                prix_boisson = 0
-
-                for boisson in Boisson.objects.all():
-                    quantity = form.cleaned_data.get(f'boisson_{boisson.id}')
-                    order_item, created = Order_item.objects.get_or_create(order=order, boisson=boisson)
-                    if quantity is not None:
-                        order_item.quantity = int(quantity)
-                        order_item.save()
-                        prix_boisson += boisson.prix * int(quantity)
-
-                # Calculate the total price using fixed values
-                prix_person = adults * 15.8 + kids * 12.8 + toddlers * 9.8
-                prix_total = prix_person + prix_boisson
-                order.prix = prix_total
-                order.save()
-                # After saving, redirect to prevent form resubmission
-                return redirect('order_detail', table_id=table.id)
-        else:
-            print(form.errors)
-    else:
-        form = Change_order_form(initial={'adults': order.adults if order else 0,
-                                          'kids': order.kids if order else 0,
-                                          'toddlers': order.toddlers if order else 0})
-
-    # Include existing order item quantities in the context
-    boisson_quantities = {}
-    if order:
-        boisson_ordered = Order_item.objects.filter(order=order)
-        for item in boisson_ordered:
-            boisson_quantities[item.boisson.id] = item.quantity
-
-    context = {
-        'table': table,
-        'order': order,
-        'form': form,
-        'boissons_sa': boissons_sa,
-        'boissons_aa': boissons_aa,
-        'boisson_quantities': boisson_quantities,
-    }
-    return render(request, 'restaurant/order_detail.html', context)
+            adults=form.cleaned_data.get('adults')
+            toddlers=form.cleaned_data.get('toddlers')
+            kids=form.cleaned_data.get('kids')
+            order_obj.adults=adults
+            order_obj.kids=kids
+            order_obj.toddlers=toddlers
+            order_obj.save()
+            
+        for b in boissons:
+            prix_boisson=0
+            quantity=form.cleaned_data.get(f'boisson_{b.name}')
+            if quantity:
+                b_old=boisson_ordered.filter(boisson=b).all().first()
+                prix_boisson+=b.prix*int(quantity)
+                b_old.quantity=quantity
+                b_old.save()
+        prix_person=adults*3+kids*2+toddlers
+        prix_total=prix_boisson+prix_person
+        order_obj.prix=prix_total
+        order_obj.save()
+    form = Change_order_form()
+    for b in boissons:
+        
+        b.quantity = boisson_ordered.filter(boisson_id=b.id).values_list("quantity",flat=True).first() if boisson_ordered.filter(boisson_id=b.id).exists() else 0
+    return render(request, 'restaurant/order_detail.html', {
+        'adults':order_obj.adults,
+        'kids':order_obj.kids,
+        'toddlers':order_obj.toddlers,
+        'form':form,
+        'boissons': boissons,
+        'order':order_obj,
+    })
 
 
 def cashier_summary(request):
