@@ -1,9 +1,18 @@
 from django.db import models
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 class Boisson(models.Model):
+    name = models.CharField(max_length=20)
+    prix = models.DecimalField(max_digits=5, decimal_places=2)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='boissons')
 
-    name=models.CharField(max_length=20)
-    prix=models.FloatField()
+    def __str__(self):
+        return self.name
+
 
 class Table(models.Model):
     name=models.CharField(max_length=20,null=True)

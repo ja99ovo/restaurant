@@ -53,56 +53,79 @@
                 </div>
             </div>
     
+            <!-- COCKTAILS SA 酒水部分 -->
             <div class="section drinks">
                 <h3>COCKTAILS SA</h3>
                 <ul>
-                    {% for boisson in boissons %}
+                    {% for boisson in boissons_sa %}
                         <li>
-                            Nom: {{ boisson.name }}
-                            Nombre：<h1 id="display_boisson_{{boisson.name}}">0</h1>
-                            <button type="button" onclick="increment('boisson_{{boisson.name}}')">加Ajouter</button>
-                            <button type="button" onclick="decrement('boisson_{{boisson.name}}')">减Réduire</button>
+                            {{ boisson.name }}
+                            数量：<span id="display_boisson_{{ boisson.id }}">{{ boisson.quantity }}</span>
+                            <button type="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
+                            <button type="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
+                        </li>   
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <!-- COCKTAILS AA 酒水部分 -->
+            <div class="section drinks">
+                <h3>COCKTAILS AA</h3>
+                <ul>
+                    {% for boisson in boissons_aa %}
+                        <li>
+                            {{ boisson.name }}
+                            <span id="display_boisson_{{ boisson.id }}">{{ boisson.quantity }}</span>
+                            <button type="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
+                            <button type="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
                         </li>   
                     {% endfor %}
                 </ul>
             </div>
         </div>
         
+        <!-- 表单用于提交更改 -->
         <form method="post">
             {% csrf_token %}
-            {{ form }}
-            <button type="submit">提交Soumettre</button>
-        </form>
-    
-        <form method="post">
-            {% csrf_token %}
-            {{ form_addition }}
-            <button type="submit">结算Régler</button>
+            {{ form.as_p }}
+            <button type="submit">更新订单</button>
         </form>
 
         <script>
-            document.getElementById("id_adults").value={{ adults }}
-            document.getElementById("id_kids").value={{ kids }}
-            document.getElementById("id_toddlers").value={{ toddlers }}
-            {% for boisson in boissons %}
-            document.getElementById("id_boisson_"+'{{ boisson.name }}').value={{ boisson.quantity }}
-            {% endfor %}
+            // 页面加载时设置初始值
+            window.onload = function() {
+                document.getElementById("display_adults").textContent = {{ order.adults }};
+                document.getElementById("display_kids").textContent = {{ order.kids }};
+                document.getElementById("display_toddlers").textContent = {{ order.toddlers }};
+                {% for boisson in boissons_sa %}
+                    document.getElementById("display_boisson_{{ boisson.id }}").textContent = {{ boisson.quantity }};
+                {% endfor %}
+                {% for boisson in boissons_aa %}
+                    document.getElementById("display_boisson_{{ boisson.id }}").textContent = {{ boisson.quantity }};
+                {% endfor %}
+            };
+        
             function increment(id) {
-                var display_input = document.getElementById("display_" +id);
-                var input = document.getElementById("id_"+id);
-                display_input.innerText = parseInt(display_input.innerText) + 1;
-                input.value=parseInt(input.value)+1;
+                var display = document.getElementById("display_" + id);
+                var value = parseInt(display.textContent);
+                display.textContent = value + 1;
+                // 如果有对应的输入框，则更新值
+                var input = document.getElementById("id_" + id);
+                if(input) input.value = value + 1;
             }
-    
+        
             function decrement(id) {
-                var input = document.getElementById("id_"+id);
-                var display_input = document.getElementById("display_" +id);
-                if (parseInt(input.value) > 0) {
-                    input.value = parseInt(input.value) - 1;
-                    display_input.innerText = parseInt(display_input.innerText) - 1;
+                var display = document.getElementById("display_" + id);
+                var value = parseInt(display.textContent);
+                if (value > 0) {
+                    display.textContent = value - 1;
+                    // 如果有对应的输入框，则更新值
+                    var input = document.getElementById("id_" + id);
+                    if(input) input.value = value - 1;
                 }
             }
         </script>
+        
     </body>
 
     {% endblock %}

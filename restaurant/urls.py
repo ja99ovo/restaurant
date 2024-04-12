@@ -12,6 +12,7 @@ urlpatterns = [
     path('table/<int:table_id>/add_order_item/<int:order_id>/', views.add_order_item, name='add_order_item_with_order'),
     path('login/',views.login_view,name='login'),
     path('logout/',views.logout_view,name='logout'),
+    path('order_detail/<int:table_id>/', views.order_detail, name='order_detail'),
     path('order_detail/', views.order_detail, name='order_detail'),
     path('clear_all_orders/', views.clear_all_orders, name='clear_all_orders'),
 ]
