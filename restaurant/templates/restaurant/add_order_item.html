@@ -75,7 +75,6 @@
                         <span id="display_boisson_{{ boisson.id }}">0</span>
                         <button type="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
                         <button type="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
-                        <input type="hidden" id="id_boisson_{{ boisson.id }}" name="boisson_{{ boisson.id }}" value="0">
                     </li>   
                 {% endfor %}
             </ul>
@@ -91,7 +90,6 @@
                         <span id="display_boisson_{{ boisson.id }}">0</span>
                         <button type="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
                         <button type="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
-                        <input type="hidden" id="id_boisson_{{ boisson.id }}" name="boisson_{{ boisson.id }}" value="0">
                     </li>   
                 {% endfor %}
             </ul>
@@ -100,29 +98,24 @@
     
     <form method="post">
         {% csrf_token %}
-        {{ form.adults }}
-        {{ form.kids }}
-        {{ form.toddlers }}
-        <!-- 隐藏的酒水数量输入将在这里通过JavaScript更新 -->
+        {{ form }}
         <button type="submit">提交 Soumettre</button>
     </form>
 
     <script>
         function increment(id) {
-            var display_span = document.getElementById("display_" + id);
-            var input = document.getElementById("id_" + id);
-            var currentValue = parseInt(display_span.innerText);
-            display_span.innerText = currentValue + 1;
-            input.value = currentValue + 1;
+            var display_input = document.getElementById("display_" +id);
+            var input = document.getElementById("id_"+id);
+            display_input.innerText = parseInt(display_input.innerText) + 1;
+            input.value=parseInt(input.value)+1;
         }
 
         function decrement(id) {
-            var display_span = document.getElementById("display_" + id);
-            var input = document.getElementById("id_" + id);
-            var currentValue = parseInt(display_span.innerText);
-            if (currentValue > 0) {
-                display_span.innerText = currentValue - 1;
-                input.value = currentValue - 1;
+            var input = document.getElementById("id_"+id);
+            var display_input = document.getElementById("display_" +id);
+            if (parseInt(input.value) > 0) {
+                input.value = parseInt(input.value) - 1;
+                display_input.innerText = parseInt(display_input.innerText) - 1;
             }
         }
     </script>

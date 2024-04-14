@@ -101,25 +101,30 @@ def add_order_item(request):
 
             prix_boisson = 0
 
-            for category in Category.objects.all():
-                boissons = Boisson.objects.filter(category=category)
-                
-                for boisson in boissons:
-                    boisson_key = f'boisson_{boisson.id}'
-                    quantity = form.cleaned_data.get(boisson_key, 0)
-
-                    if quantity:
-                        Order_item.objects.create(order=new_order, boisson=boisson, quantity=quantity)
-                        prix_boisson += boisson.prix * quantity
-            
+            boissons=Boisson.objects.all()
+            for boisson in boissons:
+                quantity=form.cleaned_data.get(f'boisson_{boisson.id}')
+                if quantity:
+                    Order_item.objects.create(order=new_order, boisson=boisson, quantity=quantity)
+                    prix_boisson += boisson.prix * quantity
             # 使用固定的价格
             prix_person = adults * 15.8 + kids * 12.8 + toddlers * 9.8
             prix_total = prix_person + prix_boisson
-            
             new_order.prix = prix_total
             new_order.save()
-
-            return redirect('order_detail', table_id=table_this.id)
+            
+            new_form=Change_order_form()
+            boisson_ordered=Order_item.objects.filter(order=new_order).all()
+            for b in boissons:
+                b.quantity = boisson_ordered.filter(boisson_id=b.id).values_list("quantity",flat=True).first() if boisson_ordered.filter(boisson_id=b.id).exists() else 0
+            return render(request, 'restaurant/order_detail.html', {
+                'adults':adults,
+                'kids':kids,
+                'toddlers':toddlers,
+                'form':new_form,
+                'boissons': boissons,
+                'order': new_order
+            })
         else:
             # 打印错误信息到控制台
             print(form.errors)
