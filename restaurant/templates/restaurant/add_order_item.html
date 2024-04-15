@@ -44,6 +44,8 @@
         }
     </style>
 </head>
+{% extends "base.html" %}
+{% block content %}
 <body>
     <div class="container">
         <div class="section people">
@@ -65,36 +67,22 @@
             </div>
         </div>
 
-        <!-- 分类 SA 的酒水 -->
+        {% for category in categories %}
         <div class="section drinks">
-            <h3>COCKTAILS SA</h3>
+            <h3>{{ category.name }}</h3>
             <ul>
-                {% for boisson in boissons_sa %}
+                {% for boisson in category.boissons.all %}
                     <li class="drink-item">
                         {{ boisson.name }}
                         <span id="display_boisson_{{ boisson.id }}">0</span>
                         <button type="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
                         <button type="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
-                    </li>   
+                    </li>
                 {% endfor %}
             </ul>
         </div>
-
-        <!-- 分类 AA 的酒水 -->
-        <div class="section drinks aa">
-            <h3>COCKTAILS AA</h3>
-            <ul>
-                {% for boisson in boissons_aa %}
-                    <li class="drink-item">
-                        {{ boisson.name }}
-                        <span id="display_boisson_{{ boisson.id }}">0</span>
-                        <button type="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
-                        <button type="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
-                    </li>   
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
+    {% endfor %}
+    
     
     <form method="post">
         {% csrf_token %}
@@ -120,4 +108,6 @@
         }
     </script>
 </body>
+{% endblock %}
 </html>
+

@@ -86,7 +86,7 @@ def cashier_summary(request):
 
 @login_required(redirect_field_name="login")
 def add_order_item(request):
-    boissons=Boisson.objects.all()
+    categories = Category.objects.prefetch_related('boissons').all()  # 获取所有分类及其酒水
     table_id = request.GET.get('table_id')
     table_this=Table.objects.get(id=table_id)
     if request.method == 'POST':
@@ -118,18 +118,18 @@ def add_order_item(request):
             for b in boissons:
                 b.quantity = boisson_ordered.filter(boisson_id=b.id).values_list("quantity",flat=True).first() if boisson_ordered.filter(boisson_id=b.id).exists() else 0
             return render(request, 'restaurant/order_detail.html', {
-                'adults':adults,
-                'kids':kids,
-                'toddlers':toddlers,
-                'form':new_form,
-                'boissons': boissons,
+                'form': Change_order_form(instance=new_order),
+                'categories': categories,  # 将分类传递到模板
                 'order': new_order
             })
         else:
-            print("not valid")
+            form = New_order_form()
     else:
         form = New_order_form()
-    return render(request, 'restaurant/add_order_item.html', {'form':form,'boissons': boissons})
+    return render(request, 'restaurant/add_order_item.html', {
+        'form': form,
+        'categories': categories  # 将分类传递到模板
+    })
 
 
 def cashier_summary(request):
