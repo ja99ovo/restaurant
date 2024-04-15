@@ -38,6 +38,7 @@ def table_detail(request, table_id):
 
 @login_required(redirect_field_name="login_view")
 def order_detail(request):
+    categories = Category.objects.prefetch_related('boissons').all()  # 获取所有分类及其酒水
     table_id = request.GET.get('table_id')
     boissons=Boisson.objects.all()
     
