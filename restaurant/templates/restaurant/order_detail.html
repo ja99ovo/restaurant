@@ -1,3 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+
 <!DOCTYPE html>
 <html lang="zh">
     <head>
@@ -28,8 +31,6 @@
         </style>
     </head>
 
-{% extends "base.html" %}
-{% block content %}
     <body>
         <h1> id: {{ order.id }}  </h1>
         <h1> prix: {{ order.prix }}  </h1>
@@ -52,36 +53,21 @@
                     <button type="button" onclick="decrement('toddlers')">Petits enfants -1</button>
                 </div>
             </div>
-    
-            <!-- COCKTAILS SA 酒水部分 -->
+            {% for category in categories %}
             <div class="section drinks">
-                <h3>COCKTAILS SA</h3>
+                <h3>{{ category.name }}</h3>
                 <ul>
-                    {% for boisson in boissons_sa %}
-                        <li>
+                    {% for boisson in category.boissons.all %}
+                        <li class="drink-item">
                             {{ boisson.name }}
-                            数量：<span id="display_boisson_{{ boisson.id }}">{{ boisson.quantity }}</span>
+                            <span id="display_boisson_{{ boisson.id }}">0</span>
                             <button type="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
                             <button type="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
-                        </li>   
+                        </li>
                     {% endfor %}
                 </ul>
             </div>
-            
-            <!-- COCKTAILS AA 酒水部分 -->
-            <div class="section drinks">
-                <h3>COCKTAILS AA</h3>
-                <ul>
-                    {% for boisson in boissons_aa %}
-                        <li>
-                            {{ boisson.name }}
-                            <span id="display_boisson_{{ boisson.id }}">{{ boisson.quantity }}</span>
-                            <button type="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
-                            <button type="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
-                        </li>   
-                    {% endfor %}
-                </ul>
-            </div>
+            {% endfor %}
         </div>
         
         <!-- 表单用于提交更改 -->
@@ -127,6 +113,5 @@
         </script>
         
     </body>
-
-    {% endblock %}
 </html>
+{% endblock %}

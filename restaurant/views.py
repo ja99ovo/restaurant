@@ -63,8 +63,8 @@ def order_detail(request):
                 prix_boisson+=b.prix*int(quantity)
                 b_old.quantity=quantity
                 b_old.save()
-        prix_person=adults*3+kids*2+toddlers
-        prix_total=prix_boisson+prix_person
+        prix_person = Decimal(adults) * Decimal('15.8') + Decimal(kids) * Decimal('12.8') + Decimal(toddlers) * Decimal('9.8')
+        prix_total = prix_person + prix_boisson
         order_obj.prix=prix_total
         order_obj.save()
     form = Change_order_form()
@@ -87,6 +87,7 @@ def cashier_summary(request):
 @login_required(redirect_field_name="login")
 def add_order_item(request):
     categories = Category.objects.prefetch_related('boissons').all()  # 获取所有分类及其酒水
+    boissons=Boisson.objects.all()
     table_id = request.GET.get('table_id')
     table_this=Table.objects.get(id=table_id)
     if request.method == 'POST':
