@@ -81,7 +81,7 @@ function clearOrders() {
         <li>
             Numéro de table: {{ table.id }}
             {% if table.active %}
-                <a href="{% url 'order_detail' %}?table_id={{ table.id }}">Voir la commande: {{table.active}}</a>
+                <a href="{% url 'add_order_item' %}?table_id={{ table.id }}">Voir la commande: {{table.active}}</a>
             {% else %}
                 <a href="{% url 'add_order_item' %}?table_id={{ table.id }}">Créer une nouvelle commande</a>
             {% endif %}

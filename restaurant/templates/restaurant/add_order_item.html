@@ -51,17 +51,17 @@
         <div class="section people">
             <h3>Nombre de personnes</h3>
             <div>
-                <h1 >Adultes</h1><h1 id="display_adults">0</h1>
+                <h1 >Adultes</h1><h1 id="display_adults">{{ adults }}</h1>
                 <button type="button" onclick="increment('adults')">Adultes +1</button>
                 <button type="button" onclick="decrement('adults')">Adultes -1</button>
             </div>
             <div>
-                <h1 >Grands enfants</h1><h1 id="display_kids">0</h1>
+                <h1 >Grands enfants</h1><h1 id="display_kids">{{ kids }}</h1>
                 <button type="button" onclick="increment('kids')">Grands enfants +1</button>
                 <button type="button" onclick="decrement('kids')">Grands enfants -1</button>
             </div>
             <div>
-                <h1 >Petits enfants</h1><h1 id="display_toddlers">0</h1>
+                <h1 >Petits enfants</h1><h1 id="display_toddlers">{{ toddlers }}</h1>
                 <button type="button" onclick="increment('toddlers')">Petits enfants +1</button>
                 <button type="button" onclick="decrement('toddlers')">Petits enfants -1</button>
             </div>
@@ -71,13 +71,15 @@
         <div class="section drinks">
             <h3>{{ category.name }}</h3>
             <ul>
-                {% for boisson in category.boissons.all %}
+                {% for boisson in boissons %}
+                    {% if boisson.category.name  == category.name %}
                     <li class="drink-item">
                         {{ boisson.name }}
-                        <span id="display_boisson_{{ boisson.id }}">0</span>
+                        <span id="display_boisson_{{ boisson.id }}">{{ boisson.quantity }}</span>
                         <button type="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
                         <button type="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
                     </li>
+                    {% endif %}
                 {% endfor %}
             </ul>
         </div>
@@ -91,6 +93,14 @@
     </form>
 
     <script>
+        document.getElementById("id_adults").value={{ adults }}
+        document.getElementById("id_kids").value={{ kids }}
+        document.getElementById("id_toddlers").value={{ toddlers }}
+        {% for category in categories %}
+            {% for boisson in boissons %}
+            document.getElementById("id_boisson_"+'{{ boisson.id }}').value={{ boisson.quantity }}
+            {% endfor %}
+        {% endfor %}
         function increment(id) {
             var display_input = document.getElementById("display_" +id);
             var input = document.getElementById("id_"+id);
@@ -106,6 +116,7 @@
                 display_input.innerText = parseInt(display_input.innerText) - 1;
             }
         }
+
     </script>
 </body>
 {% endblock %}

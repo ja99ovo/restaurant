@@ -87,52 +87,111 @@ def cashier_summary(request):
 
 @login_required(redirect_field_name="login")
 def add_order_item(request):
-    categories = Category.objects.prefetch_related('boissons').all()  # 获取所有分类及其酒水
-    boissons=Boisson.objects.all()
     table_id = request.GET.get('table_id')
     table_this=Table.objects.get(id=table_id)
+    order_active=Table.objects.get(id=table_id).orders.all().filter(status='Active').first()
+    categories = Category.objects.all()  # 获取所有分类及其酒水
+    boissons=Boisson.objects.all()
+    new_form=New_order_form()
+
     if request.method == 'POST':
         form =New_order_form(request.POST)
-        
         if form.is_valid():
+            
             adults=form.cleaned_data.get('adults')
             toddlers=form.cleaned_data.get('toddlers')
             kids=form.cleaned_data.get('kids')
-            
-            new_order=Order(adults=adults,kids=kids,toddlers=toddlers,table=table_this)
-            new_order.save()
-
             prix_boisson=0
-            for b in boissons:
-                quantity=form.cleaned_data.get(f'boisson_{b.name}')
-                if quantity:
-                    new_order_item=Order_item(quantity=quantity,boisson=b,order=new_order)
-                    prix_boisson+=b.prix*int(quantity)
-                    new_order_item.save()
-            # 使用固定的价格
-            prix_person = Decimal(adults) * Decimal('15.8') + Decimal(kids) * Decimal('12.8') + Decimal(toddlers) * Decimal('9.8')
-            prix_total = prix_person + prix_boisson
-            new_order.prix=prix_total
-            new_order.save()
-            #重定向到订单修改页面
-            new_form=Change_order_form()
-            boisson_ordered=Order_item.objects.filter(order=new_order).all()
+                     
+            if order_active:
+                order_active.adults=adults
+                order_active.kids=kids
+                order_active.toddlers=toddlers
+                order_active.save()
+                boisson_ordered=Order_item.objects.filter(order=order_active).all()
+                for b in boissons:
+                    quantity=form.cleaned_data.get(f'boisson_{b.id}')
+                    b.quantity=quantity
+                    print(quantity)
+                    if quantity:
+                        b_old, created = boisson_ordered.get_or_create(boisson=b, defaults={'quantity': quantity},order=order_active)
+                        b_old.quantity = quantity
+                        b_old.save()
+                        prix_boisson+=b.prix*int(quantity)
+                        
+                prix_person = Decimal(adults) * Decimal('15.8') + Decimal(kids) * Decimal('12.8') + Decimal(toddlers) * Decimal('9.8')
+                prix_total = prix_person + prix_boisson
+                order_active.prix=prix_total
+                order_active.save()
+                return render(request, 'restaurant/add_order_item.html', {
+                    'adults': order_active.adults,
+                    'kids': order_active.kids,
+                    'toddlers': order_active.toddlers,
+                    'boissons' : boissons,
+                    'form':new_form,
+                    'categories':categories,
+                    'order':order_active
+            })
+            else:
+                new_order=Order(adults=adults,kids=kids,toddlers=toddlers,table=table_this)
+                new_order.save()
+
+                for b in boissons:
+                    quantity=form.cleaned_data.get(f'boisson_{b.id}')
+                    b.quantity=quantity
+                    if quantity:
+                        new_order_item=Order_item(quantity=quantity,boisson=b,order=new_order)
+                        prix_boisson+=b.prix*int(quantity)
+                        new_order_item.save()
+                # 使用固定的价格
+                prix_person = Decimal(adults) * Decimal('15.8') + Decimal(kids) * Decimal('12.8') + Decimal(toddlers) * Decimal('9.8')
+                prix_total = prix_person + prix_boisson
+                new_order.prix=prix_total
+                new_order.save()
+                
+                return render(request, 'restaurant/add_order_item.html', {
+                    'adults': new_order.adults,
+                    'kids': new_order.kids,
+                    'toddlers': new_order.toddlers,
+                    'boissons' : boissons,
+                    'form':new_form,
+                    'categories':categories,
+                    'order':new_order
+            })
+    else:        
+        if order_active:
+            boisson_ordered=Order_item.objects.filter(order=order_active).all()
             for b in boissons:
                 b.quantity = boisson_ordered.filter(boisson_id=b.id).values_list("quantity",flat=True).first() if boisson_ordered.filter(boisson_id=b.id).exists() else 0
-            return render(request, 'restaurant/order_detail.html', {
-                'form': Change_order_form(instance=new_order),
-                'categories': categories,  # 将分类传递到模板
-                'order': new_order
+            return render(request, 'restaurant/add_order_item.html', {
+                    'adults': order_active.adults,
+                    'kids': order_active.kids,
+                    'toddlers': order_active.toddlers,
+                    'boissons' : boissons,
+                    'form':new_form,
+                    'categories':categories,
+                    'order':order_active
             })
         else:
-            form = New_order_form()
-    else:
-        form = New_order_form()
-    return render(request, 'restaurant/add_order_item.html', {
-        'form': form,
-        'categories': categories  # 将分类传递到模板
-    })
+            for b in boissons:
+                b.quantity =0
+            return render(request, 'restaurant/add_order_item.html', {
+                    'adults': 0,
+                    'kids': 0,
+                    'toddlers': 0,
+                    'boissons' : boissons,
+                    'form':new_form,
+                    'categories':categories,
+                    'order':None
+            })
+    
+    
+    
 
+    
+    
+    
+    
 
 def cashier_summary(request):
     pass
