@@ -10,6 +10,8 @@ from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from decimal import Decimal
+
 
 @login_required(redirect_field_name="login_view")
 def table_list(request):
@@ -33,6 +35,7 @@ def base(request):
 @login_required(redirect_field_name="login_view")
 def table_detail(request, table_id):
     pass
+
 @login_required(redirect_field_name="login_view")
 def order_detail(request):
     table_id = request.GET.get('table_id')
@@ -40,8 +43,6 @@ def order_detail(request):
     
     order_obj=Table.objects.get(id=table_id).orders.all().filter(status='Active').first()
     boisson_ordered=Order_item.objects.filter(order_id=order_obj.id).all()
-    
-    
     
     if request.method == 'POST':
         form = Change_order_form(request.POST)
@@ -101,30 +102,25 @@ def add_order_item(request):
 
             prix_boisson = 0
 
-            boissons=Boisson.objects.all()
-            for boisson in boissons:
-                quantity=form.cleaned_data.get(f'boisson_{boisson.id}')
-                if quantity:
-                    Order_item.objects.create(order=new_order, boisson=boisson, quantity=quantity)
-                    prix_boisson += boisson.prix * quantity
+            for category in Category.objects.all():
+                boissons = Boisson.objects.filter(category=category)
+                
+                for boisson in boissons:
+                    boisson_key = f'boisson_{boisson.id}'
+                    quantity = form.cleaned_data.get(boisson_key, 0)
+
+                    if quantity:
+                        Order_item.objects.create(order=new_order, boisson=boisson, quantity=quantity)
+                        prix_boisson += boisson.prix * Decimal(quantity)
+            
             # 使用固定的价格
-            prix_person = adults * 15.8 + kids * 12.8 + toddlers * 9.8
+            prix_person = Decimal(adults) * Decimal('15.8') + Decimal(kids) * Decimal('12.8') + Decimal(toddlers) * Decimal('9.8')
             prix_total = prix_person + prix_boisson
+            
             new_order.prix = prix_total
             new_order.save()
-            
-            new_form=Change_order_form()
-            boisson_ordered=Order_item.objects.filter(order=new_order).all()
-            for b in boissons:
-                b.quantity = boisson_ordered.filter(boisson_id=b.id).values_list("quantity",flat=True).first() if boisson_ordered.filter(boisson_id=b.id).exists() else 0
-            return render(request, 'restaurant/order_detail.html', {
-                'adults':adults,
-                'kids':kids,
-                'toddlers':toddlers,
-                'form':new_form,
-                'boissons': boissons,
-                'order': new_order
-            })
+
+            return redirect('order_detail', table_id=table_this.id)
         else:
             # 打印错误信息到控制台
             print(form.errors)
