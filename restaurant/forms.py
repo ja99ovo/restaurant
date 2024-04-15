@@ -21,16 +21,6 @@ class New_order_form(forms.Form):
                 )
 
 
-class Change_order_form(forms.ModelForm):
-    class Meta:
-        model = Order
-        fields = ['adults', 'kids', 'toddlers']
-        widgets = {
-            'adults': forms.HiddenInput(),
-            'kids': forms.HiddenInput(),
-            'toddlers': forms.HiddenInput(),
-        }
-
 
 class login_form(AuthenticationForm):
     username= forms.CharField(label='username' ,widget=forms.TextInput(attrs={'class':'form-control','required':''}))

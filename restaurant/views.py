@@ -1,6 +1,6 @@
 from .models import Table, Order, Order_item,Boisson, Category
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import New_order_form, Change_order_form,login_form
+from .forms import New_order_form, login_form
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
@@ -35,52 +35,6 @@ def base(request):
 @login_required(redirect_field_name="login_view")
 def table_detail(request, table_id):
     pass
-
-@login_required(redirect_field_name="login_view")
-def order_detail(request):
-    categories = Category.objects.prefetch_related('boissons').all()  # 获取所有分类及其酒水
-    table_id = request.GET.get('table_id')
-    boissons=Boisson.objects.all()
-    
-    order_obj=Table.objects.get(id=table_id).orders.all().filter(status='Active').first()
-    boisson_ordered=Order_item.objects.filter(order_id=order_obj.id).all()
-    
-    if request.method == 'POST':
-        form = Change_order_form(request.POST)
-        if form.is_valid():
-            adults=form.cleaned_data.get('adults')
-            toddlers=form.cleaned_data.get('toddlers')
-            kids=form.cleaned_data.get('kids')
-            order_obj.adults=adults
-            order_obj.kids=kids
-            order_obj.toddlers=toddlers
-            order_obj.save()
-            
-        for b in boissons:
-            prix_boisson=0
-            quantity=form.cleaned_data.get(f'boisson_{b.name}')
-            if quantity:
-                b_old=boisson_ordered.filter(boisson=b).all().first()
-                prix_boisson+=b.prix*int(quantity)
-                b_old.quantity=quantity
-                b_old.save()
-        prix_person = Decimal(adults) * Decimal('15.8') + Decimal(kids) * Decimal('12.8') + Decimal(toddlers) * Decimal('9.8')
-        prix_total = prix_person + prix_boisson
-        order_obj.prix=prix_total
-        order_obj.save()
-    form = Change_order_form()
-    for b in boissons:
-        
-        b.quantity = boisson_ordered.filter(boisson_id=b.id).values_list("quantity",flat=True).first() if boisson_ordered.filter(boisson_id=b.id).exists() else 0
-    return render(request, 'restaurant/order_detail.html', {
-        'adults':order_obj.adults,
-        'kids':order_obj.kids,
-        'toddlers':order_obj.toddlers,
-        'form':form,
-        'boissons': boissons,
-        'order':order_obj,
-    })
-
 
 def cashier_summary(request):
     pass
