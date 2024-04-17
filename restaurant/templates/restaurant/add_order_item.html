@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -13,21 +15,21 @@
 
         .container {
             display: flex;
-            flex-wrap: wrap; /* 允许元素在必要时换行 */
+            flex-wrap: wrap;
             justify-content: space-around;
             margin: 20px;
         }
 
         .section {
-            flex: 0 0 100%; /* 在小屏幕上，让元素占据全部宽度 */
+            flex: 0 0 100%;
             padding: 10px;
             margin: 5px;
             border: 1px solid #ddd;
         }
 
-        @media (min-width: 768px) { /* 平板和桌面屏幕 */
+        @media (min-width: 768px) {
             .section {
-                flex: 1; /* 允许元素在大屏幕上灵活伸缩 */
+                flex: 1;
             }
         }
 
@@ -39,29 +41,36 @@
         .section button {
             margin: 5px;
         }
-        .drink-item {
-            margin: 5px 0;
+        
+        .horizontal-layout {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .time-input {
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-left: 20px;
         }
     </style>
 </head>
-{% extends "base.html" %}
-{% block content %}
 <body>
     <div class="container">
         <div class="section people">
             <h3>Nombre de personnes</h3>
             <div>
-                <h1 >Adultes</h1><h1 id="display_adults">{{ adults }}</h1>
+                <h1>Adultes</h1><h1 id="display_adults">{{ adults }}</h1>
                 <button type="button" onclick="increment('adults')">Adultes +1</button>
                 <button type="button" onclick="decrement('adults')">Adultes -1</button>
             </div>
             <div>
-                <h1 >Grands enfants</h1><h1 id="display_kids">{{ kids }}</h1>
+                <h1>Grands enfants</h1><h1 id="display_kids">{{ kids }}</h1>
                 <button type="button" onclick="increment('kids')">Grands enfants +1</button>
                 <button type="button" onclick="decrement('kids')">Grands enfants -1</button>
             </div>
             <div>
-                <h1 >Petits enfants</h1><h1 id="display_toddlers">{{ toddlers }}</h1>
+                <h1>Petits enfants</h1><h1 id="display_toddlers">{{ toddlers }}</h1>
                 <button type="button" onclick="increment('toddlers')">Petits enfants +1</button>
                 <button type="button" onclick="decrement('toddlers')">Petits enfants -1</button>
             </div>
@@ -72,7 +81,7 @@
             <h3>{{ category.name }}</h3>
             <ul>
                 {% for boisson in boissons %}
-                    {% if boisson.category.name  == category.name %}
+                    {% if boisson.category.name == category.name %}
                     <li class="drink-item">
                         {{ boisson.name }}
                         <span id="display_boisson_{{ boisson.id }}">{{ boisson.quantity }}</span>
@@ -84,41 +93,51 @@
             </ul>
         </div>
         {% endfor %}
-    
-    
-    <form method="post">
-        {% csrf_token %}
-        {{ form }}
-        <button type="submit">提交 Soumettre</button>
-    </form>
 
-    <script>
-        document.getElementById("id_adults").value={{ adults }}
-        document.getElementById("id_kids").value={{ kids }}
-        document.getElementById("id_toddlers").value={{ toddlers }}
-        {% for category in categories %}
-            {% for boisson in boissons %}
-            document.getElementById("id_boisson_"+'{{ boisson.id }}').value={{ boisson.quantity }}
+        <div class="section">
+            <form method="post" class="horizontal-layout">
+                {% csrf_token %}
+                {{ form }}
+                <button type="submit">提交 Soumettre</button>
+                <input type="text" class="time-input" id="systemTime" readonly>
+            </form>
+        </div>
+
+        <script>
+            document.getElementById("id_adults").value = {{ adults }};
+            document.getElementById("id_kids").value = {{ kids }};
+            document.getElementById("id_toddlers").value = {{ toddlers }};
+            {% for category in categories %}
+                {% for boisson in boissons %}
+                document.getElementById("id_boisson_" + '{{ boisson.id }}').value = {{ boisson.quantity }};
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
-        function increment(id) {
-            var display_input = document.getElementById("display_" +id);
-            var input = document.getElementById("id_"+id);
-            display_input.innerText = parseInt(display_input.innerText) + 1;
-            input.value=parseInt(input.value)+1;
-        }
-
-        function decrement(id) {
-            var input = document.getElementById("id_"+id);
-            var display_input = document.getElementById("display_" +id);
-            if (parseInt(input.value) > 0) {
-                input.value = parseInt(input.value) - 1;
-                display_input.innerText = parseInt(display_input.innerText) - 1;
+            function increment(id) {
+                var display_input = document.getElementById("display_" + id);
+                var input = document.getElementById("id_" + id);
+                display_input.innerText = parseInt(display_input.innerText) + 1;
+                input.value = parseInt(input.value) + 1;
             }
-        }
 
-    </script>
+            function decrement(id) {
+                var input = document.getElementById("id_" + id);
+                var display_input = document.getElementById("display_" + id);
+                if (parseInt(input.value) > 0) {
+                    input.value = parseInt(input.value) - 1;
+                    display_input.innerText = parseInt(display_input.innerText) - 1;
+                }
+            }
+
+            function displayTime() {
+                var now = new Date();
+                var timeString = now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
+                document.getElementById("systemTime").value = timeString;
+            }
+
+            setInterval(displayTime, 1000);  // 更新时间每秒
+            displayTime();  // 初始化显示时间
+        </script>
+    </div>
 </body>
-{% endblock %}
 </html>
-
+{% endblock %}
