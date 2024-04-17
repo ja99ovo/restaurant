@@ -1,9 +1,11 @@
 from django import forms
 from .models import Table, Order, Order_item, Boisson
 from .models import Category, Boisson
+from django.db import models
 from django.contrib.auth.forms import AuthenticationForm
 
 class New_order_form(forms.Form):
+    created_at = models.DateTimeField(auto_now_add=True)  # 添加时间戳字段
     adults = forms.IntegerField(label='adults', initial=0, widget=forms.HiddenInput())
     kids = forms.IntegerField(label='kids', initial=0, widget=forms.HiddenInput())
     toddlers = forms.IntegerField(label='toddlers', initial=0, widget=forms.HiddenInput())

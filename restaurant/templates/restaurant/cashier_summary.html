@@ -1,36 +1,70 @@
 {% extends "restaurant/base.html" %}
 {% block content %}
-<h2>订单结算</h2>
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/pay.css' %}">
 
-<table>
-    <thead>
-        <tr>
-            <th>订单号</th>
-            <th>桌号</th>
-            <th>成人</th>
-            <th>小孩</th>
-            <th>幼儿</th>
-            <th>饮品详情</th>
-            <th>总价</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for order in orders %}
-        <tr>
-            <td>{{ order.id }}</td>
-            <td>{{ order.table.name }}</td>
-            <td>{{ order.adults }}</td>
-            <td>{{ order.kids }}</td>
-            <td>{{ order.toddlers }}</td>
-            <td>
-                {% for item in order.order_item_set.all %}
-                    {{ item.boisson.name }} x {{ item.quantity }}<br>
-                {% endfor %}
-            </td>
-            <td>{{ order.total_price }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="sales-dashboard">
+    <h2>订单结算</h2>
+
+    <div class="summary-panel">
+        <!-- 概览面板内容 -->
+        <div class="summary-box">
+            <div>Total des commandes</div>
+            <div>4</div>
+        </div>
+        <div class="summary-box">
+            <div>Commandes acceptées</div>
+            <div>4</div>
+        </div>
+        <!-- ... 其他统计数据框 ... -->
+    </div>
+
+    <table class="orders-table">
+      <thead>
+          <tr>
+              <th>订单号</th>
+              <th>时间</th>
+              <th>桌号</th>
+              <th>成人</th>
+              <th>小孩</th>
+              <th>幼儿</th>
+              <th>饮品详情</th>
+              <th>总价</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for order in orders %}
+          <tr>
+              <td>{{ order.id }}</td>
+              <td>{{ order.created_at|date:"d M Y à H:i" }}</td>
+              <td>{{ order.table.name }}</td>
+              <td>{{ order.adults }}</td>
+              <td>{{ order.kids }}</td>
+              <td>{{ order.toddlers }}</td>
+              <td>
+                  {% for item in order.order_item_set.all %}
+                  {{ item.boisson.name }} x {{ item.quantity }}<br>
+                  {% endfor %}
+              </td>
+              <td>{{ order.total_price }}</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+
+<script>
+// 每隔一段时间（比如30秒）检查新订单
+setInterval(function() {
+  fetch("{% url 'cashier_summary' %}")  // 用于检查新订单的URL
+    .then(response => response.text())
+    .then(html => {
+      // 如果页面内容发生变化，重新加载页面
+      if (document.body.innerHTML !== html) {
+        window.location.reload();
+      }
+    });
+}, 30000);  // 30秒检查一次
+</script>
 
 {% endblock %}
