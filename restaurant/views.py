@@ -139,16 +139,19 @@ def add_order_item(request):
                     'order':None
             })
     
-    
-    
 
-    
-    
-    
-    
-
+@login_required(redirect_field_name="login")
 def cashier_summary(request):
-    pass
+    # 获取所有活跃的订单
+    active_orders = Order.objects.filter(status='Active').prefetch_related('order_item_set__boisson')
+    
+    # 计算每个订单的总价和其他统计数据
+    for order in active_orders:
+        order.total_price = sum(item.boisson.prix * item.quantity for item in order.order_item_set.all())
+        # 可以添加其他统计数据
+    
+    return render(request, 'restaurant/cashier_summary.html', {'orders': active_orders})
+
 
 def login_view(request):
     if request.method == 'POST':

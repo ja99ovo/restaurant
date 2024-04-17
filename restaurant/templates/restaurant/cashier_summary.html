@@ -1,7 +1,36 @@
-<!-- restaurant/templates/restaurant/cashier_summary.html -->
-<h1>收银台总计</h1>
-<ul>
-{% for table_id, total in table_totals.items %}
-    <li>桌号 {{ table_id }} - 总计: {{ total }}</li>
-{% endfor %}
-</ul>
+{% extends "restaurant/base.html" %}
+{% block content %}
+<h2>订单结算</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>订单号</th>
+            <th>桌号</th>
+            <th>成人</th>
+            <th>小孩</th>
+            <th>幼儿</th>
+            <th>饮品详情</th>
+            <th>总价</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.table.name }}</td>
+            <td>{{ order.adults }}</td>
+            <td>{{ order.kids }}</td>
+            <td>{{ order.toddlers }}</td>
+            <td>
+                {% for item in order.order_item_set.all %}
+                    {{ item.boisson.name }} x {{ item.quantity }}<br>
+                {% endfor %}
+            </td>
+            <td>{{ order.total_price }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
