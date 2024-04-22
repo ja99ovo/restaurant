@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <!DOCTYPE html>
-    <html lang="en">
-    </html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Ajouter une commande</title>
@@ -16,21 +15,30 @@
 
         .container {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
+            flex-direction: column;  /* 修改为垂直布局 */
+            align-items: center;  /* 居中对齐子元素 */
             margin: 20px;
         }
 
         .section {
-            flex: 0 0 100%;
+            width: 100%;  /* 全宽度 */
+            max-width: 600px;  /* 最大宽度限制 */
             padding: 10px;
-            margin: 5px;
+            margin: 10px;
             border: 1px solid #ddd;
+            box-sizing: border-box;  /* 包含padding和border在内的宽度计算 */
         }
 
         @media (min-width: 768px) {
+            .container {
+                flex-direction: column;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
             .section {
-                flex: 1;
+                width: 100%;  /* 使用全宽 */
+                margin: 10px;  /* 保持与小屏时相同的边距 */
             }
         }
 
@@ -135,8 +143,8 @@
                 document.getElementById("systemTime").value = timeString;
             }
 
-            setInterval(displayTime, 1000);  // 更新时间每秒
-            displayTime();  // 初始化显示时间
+            setInterval(displayTime, 1000);  /* 更新时间每秒 */
+            displayTime();  /* 初始化显示时间 */
         </script>
     </div>
 </body>
