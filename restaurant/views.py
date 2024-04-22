@@ -140,12 +140,12 @@ def add_order_item(request):
 
 @login_required(redirect_field_name="login")
 def cashier_summary(request):
-    # 获取所有活跃的订单
-    active_orders = Order.objects.filter(status='Active').prefetch_related('order_item_set__boisson')
+    # 获取所有活跃的订单，并按更新时间降序排列
+    active_orders = Order.objects.filter(status='Active').prefetch_related('order_item_set__boisson').order_by('-updated_at')
 
     # 计算每个订单的总价和其他统计数据
     for order in active_orders:
-        # 饮品价格
+        # 饮品总价
         boisson_total = sum(item.boisson.prix * item.quantity for item in order.order_item_set.all())
         # 人数价格
         prix_person = (Decimal(order.adults) * Decimal('15.8') +

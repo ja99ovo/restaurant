@@ -33,22 +33,23 @@
           </tr>
       </thead>
       <tbody>
-          {% for order in orders %}
-          <tr>
-              <td>{{ order.id }}</td>
-              <td>{{ order.created_at|date:"d M Y à H:i" }}</td>
-              <td>{{ order.table.name }}</td>
-              <td>{{ order.adults }}</td>
-              <td>{{ order.kids }}</td>
-              <td>{{ order.toddlers }}</td>
-              <td>
-                  {% for item in order.order_item_set.all %}
-                  {{ item.boisson.name }} x {{ item.quantity }}<br>
-                  {% endfor %}
-              </td>
-              <td>{{ order.total_price }}</td>
-          </tr>
-          {% endfor %}
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.updated_at|date:"d M Y à H:i" }}</td>
+            <td>{{ order.table.name }}</td>
+            <td>{{ order.adults }}</td>
+            <td>{{ order.kids }}</td>
+            <td>{{ order.toddlers }}</td>
+            <td>
+                {% for item in order.order_item_set.all %}
+                {{ item.boisson.name }} x {{ item.quantity }}<br>
+                {% endfor %}
+            </td>
+            <td>{{ order.total_price }}</td>
+        </tr>
+        {% endfor %}
+    
       </tbody>
   </table>
 </div>

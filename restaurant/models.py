@@ -19,7 +19,7 @@ class Table(models.Model):
 
 
 class Order(models.Model):
-
+    updated_at = models.DateTimeField(auto_now=True)
     table=models.ForeignKey(Table,on_delete=models.SET_NULL, related_name='orders',null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     adults = models.IntegerField(default=0)  # 成人数量
