@@ -3,6 +3,14 @@ from .models import Table, Order, Order_item, Boisson
 from .models import Category, Boisson
 from django.db import models
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django import forms
+
+class RegisterForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ("username", "password1", "password2")
 
 class New_order_form(forms.Form):
     created_at = models.DateTimeField(auto_now_add=True)  # 添加时间戳字段

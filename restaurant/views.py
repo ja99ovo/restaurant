@@ -11,6 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from decimal import Decimal
+from django.shortcuts import render
+from .models import Order
+from django.http import JsonResponse
 
 
 @login_required(redirect_field_name="login_view")
@@ -59,6 +62,7 @@ def add_order_item(request):
                 order_active.adults=adults
                 order_active.kids=kids
                 order_active.toddlers=toddlers
+                order_active.user = request.user  # 设置订单的用户
                 order_active.save()
                 boisson_ordered=Order_item.objects.filter(order=order_active).all()
                 for b in boissons:
@@ -86,6 +90,7 @@ def add_order_item(request):
             })
             else:
                 new_order=Order(adults=adults,kids=kids,toddlers=toddlers,table=table_this)
+                new_order.user = request.user
                 new_order.save()
 
                 for b in boissons:
@@ -136,25 +141,48 @@ def add_order_item(request):
                     'categories':categories,
                     'order':None
             })
-    
+
+
+@login_required(redirect_field_name="login")    
+def some_view(request):
+    total_orders = Order.objects.count()  # 获取所有订单的总数
+    accepted_orders = Order.objects.filter(status='Active').count()  # 获取状态为"Active"的订单总数
+
+    context = {
+        'total_orders': total_orders,
+        'accepted_orders': accepted_orders,
+    }
+    return render(request, 'restaurant/cashier_summary.html', context)
 
 @login_required(redirect_field_name="login")
 def cashier_summary(request):
-    # 获取所有活跃的订单，并按更新时间降序排列
+    total_orders = Order.objects.count()  # 获取所有订单的总数
+    accepted_orders = Order.objects.filter(status='Active').count()  # 获取状态为"Active"的订单总数
     active_orders = Order.objects.filter(status='Active').prefetch_related('order_item_set__boisson').order_by('-updated_at')
-
-    # 计算每个订单的总价和其他统计数据
-    for order in active_orders:
-        # 饮品总价
-        boisson_total = sum(item.boisson.prix * item.quantity for item in order.order_item_set.all())
-        # 人数价格
-        prix_person = (Decimal(order.adults) * Decimal('15.8') +
-                       Decimal(order.kids) * Decimal('12.8') +
-                       Decimal(order.toddlers) * Decimal('9.8'))
-        # 总价
-        order.total_price = boisson_total + prix_person
     
-    return render(request, 'restaurant/cashier_summary.html', {'orders': active_orders})
+    # 使用请求头部替代 is_ajax()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        data = [{
+            'id': order.id,
+            'updated_at': order.updated_at.strftime('%d %b %Y at %H:%M'),
+            'table': order.table.name if order.table else 'No table',
+            'adults': order.adults,
+            'kids': order.kids,
+            'toddlers': order.toddlers,
+            'items': [{'name': item.boisson.name, 'quantity': item.quantity} for item in order.order_item_set.all()],
+            'total_price': float(sum(item.boisson.prix * item.quantity for item in order.order_item_set.all()) + 
+                               Decimal(order.adults) * Decimal('15.8') +
+                               Decimal(order.kids) * Decimal('12.8') +
+                               Decimal(order.toddlers) * Decimal('9.8')),
+            'username': order.user.username if order.user else 'Anonymous'
+        } for order in active_orders]
+        return JsonResponse(data, safe=False)
+
+    return render(request, 'restaurant/cashier_summary.html', {
+        'total_orders': total_orders,
+        'accepted_orders': accepted_orders,
+        'orders': active_orders  # 确保这个也被传递
+    })
 
 
 

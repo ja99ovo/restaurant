@@ -7,17 +7,16 @@
     <h2>订单结算</h2>
 
     <div class="summary-panel">
-        <!-- 概览面板内容 -->
         <div class="summary-box">
             <div>Total des commandes</div>
-            <div>4</div>
+            <div>{{ total_orders }}</div>
         </div>
         <div class="summary-box">
             <div>Commandes acceptées</div>
-            <div>4</div>
+            <div>{{ accepted_orders }}</div>
         </div>
-        <!-- ... 其他统计数据框 ... -->
     </div>
+    
 
     <table class="orders-table">
       <thead>
@@ -47,6 +46,13 @@
                 {% endfor %}
             </td>
             <td>{{ order.total_price }}</td>
+            <td>
+              {% if order.user %}
+                  {{ order.user.username }}
+              {% else %}
+                  Anonymous
+              {% endif %}
+            </td>
         </tr>
         {% endfor %}
     
@@ -55,17 +61,32 @@
 </div>
 
 <script>
-// 每隔一段时间（比如30秒）检查新订单
-setInterval(function() {
-  fetch("{% url 'cashier_summary' %}")  // 用于检查新订单的URL
-    .then(response => response.text())
-    .then(html => {
-      // 如果页面内容发生变化，重新加载页面
-      if (document.body.innerHTML !== html) {
-        window.location.reload();
-      }
-    });
-}, 30000);  // 30秒检查一次
+  setInterval(function() {
+      fetch("{% url 'cashier_summary' %}", {
+          headers: {
+              'X-Requested-With': 'XMLHttpRequest'  // 确保 Django 能识别这是 AJAX 请求
+          }
+      })
+      .then(response => response.json())
+      .then(orders => {
+          let tableBody = document.querySelector('.orders-table tbody');
+          let newHtml = '';
+          orders.forEach(order => {
+              newHtml += `<tr>
+                  <td>${order.id}</td>
+                  <td>${order.updated_at}</td>
+                  <td>${order.table}</td>
+                  <td>${order.adults}</td>
+                  <td>${order.kids}</td>
+                  <td>${order.toddlers}</td>
+                  <td>${order.items.map(item => `${item.name} x ${item.quantity}`).join('<br>')}</td>
+                  <td>${order.total_price.toFixed(2)}</td>
+                  <td>${order.username}</td>
+              </tr>`;
+          });
+          tableBody.innerHTML = newHtml; // 只更新表格体
+      });
+  }, 30000);  // 每30秒更新一次
 </script>
 
 {% endblock %}
