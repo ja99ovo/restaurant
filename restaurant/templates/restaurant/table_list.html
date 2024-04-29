@@ -76,8 +76,11 @@
 
     <div class="button-container">
         <button onclick="addNewTable()">Ajouter une nouvelle table</button>
+        {% if user.is_superuser %}
+        <!-- 只有管理员和超级用户可见此按钮 -->
         <button onclick="showCustomConfirm()">Vider toutes les commandes</button>
-   </div>
+        {% endif %}
+    </div>
 
     <!-- 自定义确认弹窗 -->
     <div id="customConfirm" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 1px solid black; background-color: white; padding: 20px; z-index: 100;">
@@ -116,6 +119,8 @@
             });
         }
     
+        // JavaScript for adding tables remains unchanged
+
         function showCustomConfirm() {
             document.getElementById("customConfirm").style.display = "block";
         }
@@ -123,7 +128,9 @@
         function hideCustomConfirm() {
             document.getElementById("customConfirm").style.display = "none";
         }
-    
+
+        {% if user.is_superuser %}
+        // Only define the function if the user is a superuser
         function clearOrders() {
             fetch('{% url "clear_all_orders" %}', {
                 method: 'POST',
@@ -143,6 +150,7 @@
             });
             hideCustomConfirm();  // 关闭确认弹窗
         }
+        {% endif %}
     </script>
     
 
@@ -153,7 +161,8 @@
                 <li>
                     Nº table: {{ table.id }}
                     {% if table.active %}
-                        <a href="{% url 'add_order_item' %}?table_id={{ table.id }}">Voir la commande: {{table.active}}</a>
+                        <a href="{% url 'add_order_item' %}?table_id={{ table.id }}">Voir la commande:{{table.active}}</a>
+                        <a href="{% url 'checkout_and_reset_table' table.id %}" class="btn btn-primary">  / Tableau de paiement et de réinitialisation</a>
                     {% else %}
                         <a href="{% url 'add_order_item' %}?table_id={{ table.id }}">Créer une nouvelle</a>
                     {% endif %}

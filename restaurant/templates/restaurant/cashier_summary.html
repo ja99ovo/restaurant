@@ -4,31 +4,31 @@
 <link rel="stylesheet" href="{% static 'css/pay.css' %}">
 
 <div class="sales-dashboard">
-    <h2>订单结算</h2>
+    <h2>订单结算 / Règlement des commandes</h2>
 
     <div class="summary-panel">
         <div class="summary-box">
-            <div>Total des commandes</div>
+            <div>Total des commandes / 总订单数</div>
             <div>{{ total_orders }}</div>
         </div>
         <div class="summary-box">
-            <div>Commandes acceptées</div>
+            <div>Commandes acceptées / 接受的订单</div>
             <div>{{ accepted_orders }}</div>
         </div>
     </div>
     
-
     <table class="orders-table">
       <thead>
           <tr>
-              <th>订单号</th>
-              <th>时间</th>
-              <th>桌号</th>
-              <th>成人</th>
-              <th>小孩</th>
-              <th>幼儿</th>
-              <th>饮品详情</th>
-              <th>总价</th>
+              <th>订单号 / Numéro de commande</th>
+              <th>时间 / Heure</th>
+              <th>桌号 / Numéro de table</th>
+              <th>成人 / Adultes</th>
+              <th>小孩 / Enfants</th>
+              <th>幼儿 / Bambins</th>
+              <th>饮品详情 / Détails des boissons</th>
+              <th>总价 / Prix total</th>
+              <th>用户 / Utilisateur</th> <!-- 新增的列显示用户 -->
           </tr>
       </thead>
       <tbody>
@@ -50,7 +50,7 @@
               {% if order.user %}
                   {{ order.user.username }}
               {% else %}
-                  Anonymous
+                  Anonyme / 匿名
               {% endif %}
             </td>
         </tr>
@@ -64,7 +64,7 @@
   setInterval(function() {
       fetch("{% url 'cashier_summary' %}", {
           headers: {
-              'X-Requested-With': 'XMLHttpRequest'  // 确保 Django 能识别这是 AJAX 请求
+              'X-Requested-With': 'XMLHttpRequest'  // 确保 Django 能识别这是 AJAX 请求 / Assurer que Django reconnaisse qu'il s'agit d'une requête AJAX
           }
       })
       .then(response => response.json())
@@ -84,9 +84,9 @@
                   <td>${order.username}</td>
               </tr>`;
           });
-          tableBody.innerHTML = newHtml; // 只更新表格体
+          tableBody.innerHTML = newHtml; // 只更新表格体 / Mise à jour du corps du tableau uniquement
       });
-  }, 30000);  // 每30秒更新一次
+  }, 30000);  // 每10秒更新一次
 </script>
 
 {% endblock %}

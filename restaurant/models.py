@@ -30,7 +30,7 @@ class Order(models.Model):
     status = models.CharField(max_length=50, default='Active')
     prix = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='orders')
-
+    status = models.CharField(max_length=20, default='Active')  # 新增字段用于标记订单状态
 
 class Order_item(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)

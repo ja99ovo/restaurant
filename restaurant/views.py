@@ -12,34 +12,59 @@ import socket
 
 from .models import Table, Order, Order_item, Boisson, Category
 from .forms import New_order_form, login_form
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from .forms import RegisterForm
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
+
+def is_superuser(user):
+    return user.is_superuser  # 可以根据需要扩展更多的条件，例如检查用户是否属于某个特定组
+
+@login_required
+@user_passes_test(is_superuser)
+def clear_all_orders(request):
+    if request.method == 'POST':
+        # 执行清空所有订单的操作
+        # 注意：这里要确保操作安全性，避免误操作
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': False})
+
+
+def register(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # 可选：注册后直接登录
+            return redirect('table_list')  # 修改为适当的重定向目标
+    else:
+        form = RegisterForm()
+    return render(request, 'restaurant/register.html', {'form': form})
 
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def send_to_printer(data):
-    """ 发送数据到打印机的函数 """
     printer_ip = '192.168.1.100'
     printer_port = 9100
-    max_attempts = 3
-    attempts = 0
-    while attempts < max_attempts:
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                sock.connect((printer_ip, printer_port))
-                sock.sendall(data.encode('gb18030'))
-        except Exception as e:
-            logging.error(f"尝试发送到打印机失败: {e}")
-            attempts += 1
-        else:
-            logging.info("数据已成功发送到打印机")
+    cut_paper_command = b'\x1d\x56\x41\x03'  # ESC/POS 命令用于切纸
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((printer_ip, printer_port))
+            sock.sendall(data.encode('gb18030') + cut_paper_command)  # 发送数据后切纸
             return True
-    logging.error("达到最大尝试次数，无法连接到打印机")
+    except Exception as e:
+        logging.error(f"Échec de l'envoi à l'imprimante : {e}")
     return False
 
+
+
 def prepare_print_data(order, boissons, order_items):
-    """ 准备订单的打印数据 """
-    print_data = f"订单详情如下:\n桌号: {order.table.name if order.table else '无'}\n"
-    print_data += f"成人: {order.adults}, 小孩: {order.kids}, 幼儿: {order.toddlers}\n"
+    """ Préparer les données d'impression pour la commande """
+    print_data = f"Détails de la commande :\nNuméro de table : {order.table.name if order.table else 'Aucune'}\n"
+    print_data += f"Adultes : {order.adults}, Enfants : {order.kids}, Bambins : {order.toddlers}\n"
     for item in order_items:
         boisson = next((b for b in boissons if b.id == item.boisson_id), None)
         if boisson:
@@ -253,3 +278,28 @@ def clear_all_orders(request):
         return JsonResponse({'success': True})
     else:
         return JsonResponse({'success': False})
+    
+@login_required
+def checkout_and_reset_table(request, table_id):
+    table = get_object_or_404(Table, id=table_id)
+    order = table.orders.filter(status='Active').first()
+
+    if order:
+        # 获取订单相关的饮品和订单项
+        boissons = Boisson.objects.all()
+        order_items = Order_item.objects.filter(order=order)
+
+        # 更新订单状态为已完成
+        order.status = 'Completed'
+        order.save()
+
+        # 生成打印数据并发送到打印机
+        print_data = prepare_print_data(order, boissons, order_items)
+        send_to_printer(print_data)
+
+        messages.success(request, "订单已成功结账并已准备迎接新客人")
+    else:
+        messages.error(request, "没有找到活跃订单")
+
+    return redirect('table_list')
+
