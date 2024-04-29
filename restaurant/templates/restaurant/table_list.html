@@ -76,9 +76,8 @@
 
     <div class="button-container">
         <button onclick="addNewTable()">Ajouter une nouvelle table</button>
-        <!-- 清空所有订单的按钮 -->
         <button onclick="showCustomConfirm()">Vider toutes les commandes</button>
-    </div>
+   </div>
 
     <!-- 自定义确认弹窗 -->
     <div id="customConfirm" style="display: none; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 1px solid black; background-color: white; padding: 20px; z-index: 100;">
@@ -109,33 +108,33 @@
             })
             .then(response => response.json())
             .then(data => {
-                if(data.success){
+                if (data.success) {
                     window.location.reload(); // 如果添加成功，重新加载页面
                 } else {
                     alert("添加桌子失败");
                 }
             });
         }
-
+    
         function showCustomConfirm() {
             document.getElementById("customConfirm").style.display = "block";
         }
-
+    
         function hideCustomConfirm() {
             document.getElementById("customConfirm").style.display = "none";
         }
-
+    
         function clearOrders() {
             fetch('{% url "clear_all_orders" %}', {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type: 'application/json'
+                    'Content-Type': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(data => {
-                if(data.success){
+                if (data.success) {
                     alert("所有订单已清空");
                     window.location.reload(); // 清空成功后，重新加载页面
                 } else {
@@ -145,6 +144,7 @@
             hideCustomConfirm();  // 关闭确认弹窗
         }
     </script>
+    
 
     {% if tables %}
         <div class="container">

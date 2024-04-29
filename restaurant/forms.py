@@ -1,11 +1,9 @@
 from django import forms
-from .models import Table, Order, Order_item, Boisson
-from .models import Category, Boisson
+from .models import Table, Order, Order_item, Boisson, Category
 from django.db import models
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from django import forms
+
 
 class RegisterForm(UserCreationForm):
     class Meta:

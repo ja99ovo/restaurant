@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="container">
+    {% if messages %}
+    <div class="section">
+        {% for message in messages %}
+        <div{% if message.tags %} class="{{ message.tags }}" {% endif %}>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,6 +72,21 @@
             padding: 5px;
             margin-left: 20px;
         }
+        .button {
+            padding: 12px 20px;  /* 增加按钮的内边距，使按钮更大更容易点击 */
+            font-size: 16px;  /* 增加字体大小，提高可读性 */
+            margin: 5px;  /* 保证按钮间有足够的空间 */
+            background-color: hwb(0 52% 28% / 0.545);  /* 使用更明显的颜色 */
+            color: white;  /* 文本颜色为白色 */
+            border: none;  /* 无边框 */
+            border-radius: 5px;  /* 圆角边框 */
+            cursor: pointer;  /* 鼠标悬停时显示手形光标 */
+        }
+
+        .button:hover {
+            background-color: #0056b3;  /* 鼠标悬停时的背景颜色 */
+        }
+
     </style>
 </head>
 <body>
@@ -86,18 +111,18 @@
         <div class="section">
             <div>
                 <h1>Adultes</h1><h1 id="display_adults">{{ adults }}</h1>
-                <button type="button" onclick="increment('adults')">Adultes +1</button>
-                <button type="button" onclick="decrement('adults')">Adultes -1</button>
+                <button type="button" class="button" onclick="increment('adults')">Adultes +1</button>
+                <button type="button" class="button" onclick="decrement('adults')">Adultes -1</button>
             </div>
             <div>
                 <h1>Grands enfants</h1><h1 id="display_kids">{{ kids }}</h1>
-                <button type="button" onclick="increment('kids')">Grands enfants +1</button>
-                <button type="button" onclick="decrement('kids')">Grands enfants -1</button>
+                <button type="button" class="button" onclick="increment('kids')">Grands enfants +1</button>
+                <button type="button" class="button" onclick="decrement('kids')">Grands enfants -1</button>
             </div>
             <div>
                 <h1>Petits enfants</h1><h1 id="display_toddlers">{{ toddlers }}</h1>
-                <button type="button" onclick="increment('toddlers')">Petits enfants +1</button>
-                <button type="button" onclick="decrement('toddlers')">Petits enfants -1</button>
+                <button type="button" class="button" onclick="increment('toddlers')">Petits enfants +1</button>
+                <button type="button" class="button" onclick="decrement('toddlers')">Petits enfants -1</button>
             </div>
         </div>
         
@@ -110,8 +135,8 @@
                     <li class="drink-item">
                         {{ boisson.name }}
                         <span id="display_boisson_{{ boisson.id }}">{{ boisson.quantity }}</span>
-                        <button type="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
-                        <button type="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
+                        <button type="button" class="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
+                        <button type="button" class="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
                     </li>
                     {% endif %}
                 {% endfor %}
