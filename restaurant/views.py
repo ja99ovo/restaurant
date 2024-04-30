@@ -64,7 +64,7 @@ def send_to_printer(data):
 def prepare_print_data(order, boissons, order_items):
     """ Préparer les données d'impression pour la commande """
     print_data = f"Détails de la commande :\nNuméro de table : {order.table.name if order.table else 'Aucune'}\n"
-    print_data += f"Adultes : {order.adults}, Enfants : {order.kids}, Bambins : {order.toddlers}\n"
+    print_data += f"Adultes : {order.adults}, Enfants : {order.kids}, Petits enfants : {order.toddlers}\n"
     for item in order_items:
         boisson = next((b for b in boissons if b.id == item.boisson_id), None)
         if boisson:

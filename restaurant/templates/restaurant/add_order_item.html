@@ -14,6 +14,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter une commande</title>
     <style>
         body {
@@ -21,72 +22,62 @@
             background-color: #f4f4f4;
             margin: 0;
             padding: 0;
+            font-size: 14px; /* 基础字体大小 */
         }
 
         .container {
             display: flex;
-            flex-direction: column;  /* 修改为垂直布局 */
-            align-items: center;  /* 居中对齐子元素 */
-            margin: 20px;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+            padding: 5px; /* 调整为更小的内边距 */
         }
 
         .section {
-            width: 100%;  /* 全宽度 */
-            max-width: 600px;  /* 最大宽度限制 */
-            padding: 10px;
-            margin: 10px;
+            width: 100%;
+            max-width: 600px;
+            padding: 5px;
+            margin: 5px;
             border: 1px solid #ddd;
-            box-sizing: border-box;  /* 包含padding和border在内的宽度计算 */
+            box-sizing: border-box;
         }
 
         @media (min-width: 768px) {
             .container {
-                flex-direction: column;
-                flex-wrap: wrap;
-                justify-content: center;
+                width: 95%; /* or max-width: 980px; */
+                margin: 0 auto; /* Center the container */
             }
+        
 
             .section {
-                width: 100%;  /* 使用全宽 */
-                margin: 10px;  /* 保持与小屏时相同的边距 */
+                padding: 10px;
+                margin: 10px;
             }
         }
 
-        .section h1 {
-            display: inline-block;
-            margin: 5px;
+        @media (max-width: 767px) {
+            .button {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+
+            body {
+                font-size: 16px; /* 提高移动设备上的字体大小 */
+            }
         }
 
-        .section button {
-            margin: 5px;
-        }
-        
-        .horizontal-layout {
-            display: flex;
-            align-items: center;
-            justify-content: space-around;
-        }
-
-        .time-input {
-            border: 1px solid #ccc;
-            padding: 5px;
-            margin-left: 20px;
-        }
         .button {
-            padding: 12px 20px;  /* 增加按钮的内边距，使按钮更大更容易点击 */
-            font-size: 16px;  /* 增加字体大小，提高可读性 */
-            margin: 5px;  /* 保证按钮间有足够的空间 */
-            background-color: hsla(0, 20%, 29%, 0.545);  /* 使用更明显的颜色 */
-            color: white;  /* 文本颜色为白色 */
-            border: none;  /* 无边框 */
-            border-radius: 5px;  /* 圆角边框 */
-            cursor: pointer;  /* 鼠标悬停时显示手形光标 */
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
         .button:hover {
-            background-color: #0056b3;  /* 鼠标悬停时的背景颜色 */
+            background-color: #0056b3;
         }
-
         .category-title {
             cursor: pointer;
             color: #007bff;
@@ -200,12 +191,6 @@
                 }
             }
 
-            function displayTime() {
-                var now = new Date();
-                var timeString = now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
-                document.getElementById("systemTime").value = timeString;
-            }
-
             function toggleSection(categoryName) {
                 var section = document.getElementById('category_' + categoryName);
                 if (section.style.display === 'none') {
@@ -213,6 +198,12 @@
                 } else {
                     section.style.display = 'none';
                 }
+            }
+
+            function displayTime() {
+                var now = new Date();
+                var timeString = now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
+                document.getElementById("systemTime").value = timeString;
             }
 
             setInterval(displayTime, 1000);  /* 更新时间每秒 */
