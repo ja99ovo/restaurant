@@ -50,9 +50,11 @@ def send_to_printer(data):
     printer_ip = '192.168.1.100'
     printer_port = 9100
     cut_paper_command = b'\x1d\x56\x41\x03'  # ESC/POS 命令用于切纸
+    font_size_command = b'\x1d\x21\x11'  # 设置字体为双宽双高
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect((printer_ip, printer_port))
+            sock.sendall(font_size_command)  # 先发送字体设置命令
             sock.sendall(data.encode('gb18030') + cut_paper_command)  # 发送数据后切纸
             return True
     except Exception as e:
