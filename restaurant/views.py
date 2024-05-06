@@ -62,16 +62,27 @@ def send_to_printer(data):
     return False
 
 
-
 def prepare_print_data(order, boissons, order_items):
-    """ Préparer les données d'impression pour la commande """
-    print_data = f"Détails de la commande :\nNuméro de table : {order.table.name if order.table else 'Aucune'}\n"
-    print_data += f"Adultes : {order.adults}, Enfants : {order.kids}, Petits enfants : {order.toddlers}\n"
+    # Define headers and footers with proper alignment
+    header = "A LA CIGOGNE\n"  # Center the restaurant name
+    footer = "\n\n感谢您的光临!\nMerci de votre venue\n".center(30)  # Center the thank you note
+    
+    # Build the body with order details
+    print_data = "Details de la commande :\n"  # Start the order details (left-aligned by default)
+    table_info = order.table.name if order.table else 'Aucune'
+    print_data += f"Numero de table : {table_info}\n"
+    print_data += f"Adultes : {order.adults}\nEnfants : {order.kids}\nPetits enfants : {order.toddlers}\n"
+    
+    # Process each ordered item
     for item in order_items:
         boisson = next((b for b in boissons if b.id == item.boisson_id), None)
         if boisson:
-            print_data += f"{boisson.name} x {item.quantity}\n"
-    return print_data
+            print_data += f"{boisson.name} x {item.quantity}\n"  # Add each item
+
+    # Concatenate all parts to form the final print-ready data
+    complete_print_data = header + print_data + footer
+
+    return complete_print_data
 
 
 @login_required(redirect_field_name="login_view")
@@ -120,6 +131,7 @@ def add_order_item(request):
                 order_active.toddlers = toddlers
                 order_active.user = request.user
                 order_active.save()
+                messages.success(request, '订单已成功更新。')
 
                 boisson_ordered = Order_item.objects.filter(order=order_active).all()
                 for b in boissons:
@@ -148,6 +160,7 @@ def add_order_item(request):
                 new_order = Order(adults=adults, kids=kids, toddlers=toddlers, table=table_this)
                 new_order.user = request.user
                 new_order.save()
+                messages.success(request, '新订单已成功创建。')
 
                 for b in boissons:
                     quantity = form.cleaned_data.get(f'boisson_{b.id}')
@@ -299,7 +312,7 @@ def checkout_and_reset_table(request, table_id):
         print_data = prepare_print_data(order, boissons, order_items)
         send_to_printer(print_data)
 
-        messages.success(request, "订单已成功结账并已准备迎接新客人")
+        messages.success(request, "订单已成功结账并已准备迎接新客人La commande a été validée avec succès et est prête à accueillir de nouveaux invités")
     else:
         messages.error(request, "没有找到活跃订单")
 
