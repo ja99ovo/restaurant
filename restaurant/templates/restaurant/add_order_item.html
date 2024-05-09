@@ -170,11 +170,6 @@
             document.getElementById("id_adults").value = {{ adults }};
             document.getElementById("id_kids").value = {{ kids }};
             document.getElementById("id_toddlers").value = {{ toddlers }};
-            {% for category in categories %}
-                {% for boisson in boissons %}
-                document.getElementById("id_boisson_" + '{{ boisson.id }}').value = {{ boisson.quantity }};
-                {% endfor %}
-            {% endfor %}
             function increment(id) {
                 var display_input = document.getElementById("display_" + id);
                 var input = document.getElementById("id_" + id);

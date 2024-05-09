@@ -115,8 +115,9 @@ def add_order_item(request):
     order_active = Table.objects.get(id=table_id).orders.all().filter(status='Active').first()
     categories = Category.objects.all()
     boissons = Boisson.objects.all()
-    new_form = New_order_form()
-
+    
+    initial_boisson = {} 
+    #如果表单被提交
     if request.method == 'POST':
         form = New_order_form(request.POST)
         if form.is_valid():
@@ -124,7 +125,7 @@ def add_order_item(request):
             toddlers = form.cleaned_data.get('toddlers')
             kids = form.cleaned_data.get('kids')
             prix_boisson = 0
-
+            #更新订单
             if order_active:
                 order_active.adults = adults
                 order_active.kids = kids
@@ -132,20 +133,23 @@ def add_order_item(request):
                 order_active.user = request.user
                 order_active.save()
                 messages.success(request, '订单已成功更新。')
-
                 boisson_ordered = Order_item.objects.filter(order=order_active).all()
                 for b in boissons:
                     quantity = form.cleaned_data.get(f'boisson_{b.id}')
                     if quantity:
+                        b.quantity=quantity
                         b_old, created = boisson_ordered.get_or_create(boisson=b, defaults={'quantity': quantity}, order=order_active)
                         b_old.quantity = quantity
                         b_old.save()
                         prix_boisson += b.prix * int(quantity)
-
+                        
+                        initial_boisson[f'boisson_{b.id}']=quantity
+                    else:
+                        b.quantity=0
                 # 生成打印数据并发送到打印机
-                print_data = prepare_print_data(order_active, boissons, boisson_ordered)
-                send_to_printer(print_data)
-
+                #print_data = prepare_print_data(order_active, boissons, boisson_ordered)
+                #send_to_printer(print_data)
+                new_form = New_order_form(initial=initial_boisson)
                 return render(request, 'restaurant/add_order_item.html', {
                     'adults': order_active.adults,
                     'kids': order_active.kids,
@@ -155,7 +159,7 @@ def add_order_item(request):
                     'categories': categories,
                     'order': order_active
                 })
-
+            #创建订单
             else:
                 new_order = Order(adults=adults, kids=kids, toddlers=toddlers, table=table_this)
                 new_order.user = request.user
@@ -168,12 +172,17 @@ def add_order_item(request):
                         new_order_item = Order_item(quantity=quantity, boisson=b, order=new_order)
                         new_order_item.save()
                         prix_boisson += b.prix * int(quantity)
-
+                        b.quantity=quantity
+                        initial_boisson[f'boisson_{b.id}']=quantity
+                    else:
+                        b.quantity=0
+                        initial_boisson[f'boisson_{b.id}']=0
                 # 生成打印数据并发送到打印机
                 new_boisson_ordered = Order_item.objects.filter(order=new_order).all()
-                print_data = prepare_print_data(new_order, boissons, new_boisson_ordered)
-                send_to_printer(print_data)
-
+                #print_data = prepare_print_data(new_order, boissons, new_boisson_ordered)
+                #send_to_printer(print_data)
+                 
+                new_form = New_order_form(initial=initial_boisson)
                 return render(request, 'restaurant/add_order_item.html', {
                     'adults': new_order.adults,
                     'kids': new_order.kids,
@@ -183,11 +192,17 @@ def add_order_item(request):
                     'categories': categories,
                     'order': new_order
                 })
+    #渲染页面
     else:
+        #如果订单存在直接显示
         if order_active:
             boisson_ordered = Order_item.objects.filter(order=order_active).all()
             for b in boissons:
                 b.quantity = boisson_ordered.filter(boisson_id=b.id).values_list("quantity", flat=True).first() if boisson_ordered.filter(boisson_id=b.id).exists() else 0
+                initial_boisson[f'boisson_{b.id}']=b.quantity
+            
+            print(initial_boisson)
+            new_form=New_order_form(initial=initial_boisson)
             return render(request, 'restaurant/add_order_item.html', {
                 'adults': order_active.adults,
                 'kids': order_active.kids,
@@ -197,9 +212,11 @@ def add_order_item(request):
                 'categories': categories,
                 'order': order_active
             })
+        #创建新订单表单
         else:
             for b in boissons:
                 b.quantity = 0
+            new_form = New_order_form()
             return render(request, 'restaurant/add_order_item.html', {
                 'adults': 0,
                 'kids': 0,
