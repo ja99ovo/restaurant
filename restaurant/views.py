@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from decimal import Decimal
 import logging
-import socket
+import socket,json
 
 from .models import Table, Order, Order_item, Boisson, Category
 from .forms import New_order_form, login_form
@@ -138,7 +138,7 @@ def add_order_item(request):
                     quantity = form.cleaned_data.get(f'boisson_{b.id}')
                     if quantity:
                         b.quantity=quantity
-                        b_old, created = boisson_ordered.get_or_create(boisson=b, defaults={'quantity': quantity}, order=order_active)
+                        b_old, created = boisson_ordered.get_or_create(boisson=b, defaults={'quantity': quantity}, order=order_active)    
                         b_old.quantity = quantity
                         b_old.save()
                         prix_boisson += b.prix * int(quantity)
@@ -146,6 +146,9 @@ def add_order_item(request):
                         initial_boisson[f'boisson_{b.id}']=quantity
                     else:
                         b.quantity=0
+                prix_person=15.8*float(adults)+12.8*float(kids)+9.8*float(toddlers)
+                order_active.prix=prix_person+float(prix_boisson)
+                order_active.save()
                 # 生成打印数据并发送到打印机
                 #print_data = prepare_print_data(order_active, boissons, boisson_ordered)
                 #send_to_printer(print_data)
@@ -181,7 +184,9 @@ def add_order_item(request):
                 new_boisson_ordered = Order_item.objects.filter(order=new_order).all()
                 #print_data = prepare_print_data(new_order, boissons, new_boisson_ordered)
                 #send_to_printer(print_data)
-                 
+                prix_person=15.8*float(adults)+12.8*float(kids)+9.8*float(toddlers)
+                new_order.prix=prix_person+float(prix_boisson)
+                new_order.save()
                 new_form = New_order_form(initial=initial_boisson)
                 return render(request, 'restaurant/add_order_item.html', {
                     'adults': new_order.adults,
@@ -200,8 +205,6 @@ def add_order_item(request):
             for b in boissons:
                 b.quantity = boisson_ordered.filter(boisson_id=b.id).values_list("quantity", flat=True).first() if boisson_ordered.filter(boisson_id=b.id).exists() else 0
                 initial_boisson[f'boisson_{b.id}']=b.quantity
-            
-            print(initial_boisson)
             new_form=New_order_form(initial=initial_boisson)
             return render(request, 'restaurant/add_order_item.html', {
                 'adults': order_active.adults,
@@ -224,7 +227,7 @@ def add_order_item(request):
                 'boissons': boissons,
                 'form': new_form,
                 'categories': categories,
-                'order': None
+                'order': 'null'
             })
 
 
@@ -245,25 +248,12 @@ def cashier_summary(request):
     total_orders = Order.objects.count()  # 获取所有订单的总数
     accepted_orders = Order.objects.filter(status='Active').count()  # 获取状态为"Active"的订单总数
     active_orders = Order.objects.filter(status='Active').prefetch_related('order_item_set__boisson').order_by('-updated_at')
-    
-    # 使用请求头部替代 is_ajax()
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        data = [{
-            'id': order.id,
-            'updated_at': order.updated_at.strftime('%d %b %Y at %H:%M'),
-            'table': order.table.name if order.table else 'No table',
-            'adults': order.adults,
-            'kids': order.kids,
-            'toddlers': order.toddlers,
-            'items': [{'name': item.boisson.name, 'quantity': item.quantity} for item in order.order_item_set.all()],
-            'total_price': float(sum(item.boisson.prix * item.quantity for item in order.order_item_set.all()) + 
-                               Decimal(order.adults) * Decimal('15.8') +
-                               Decimal(order.kids) * Decimal('12.8') +
-                               Decimal(order.toddlers) * Decimal('9.8')),
-            'username': order.user.username if order.user else 'Anonymous'
-        } for order in active_orders]
-        return JsonResponse(data, safe=False)
-
+    if request.method == 'POST':
+        body_str = request.body.decode('utf-8')
+        data = json.loads(body_str)
+        item_delete=Order_item.objects.filter(id=data.get('id_delete')).all()
+        item_delete.delete()
+        return JsonResponse({'success': True})
     return render(request, 'restaurant/cashier_summary.html', {
         'total_orders': total_orders,
         'accepted_orders': accepted_orders,

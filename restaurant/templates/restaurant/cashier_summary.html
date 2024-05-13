@@ -42,10 +42,10 @@
             <td>{{ order.toddlers }}</td>
             <td>
                 {% for item in order.order_item_set.all %}
-                {{ item.boisson.name }} x {{ item.quantity }}<br>
+                {{ item.boisson.name }} x {{ item.quantity }}  <button onclick="delete_item('{{item.id}}')">delete</button>  <br>
                 {% endfor %}
             </td>
-            <td>{{ order.total_price }}</td>
+            <td>{{ order.prix }}</td>
             <td>
               {% if order.user %}
                   {{ order.user.username }}
@@ -61,32 +61,30 @@
 </div>
 
 <script>
-  setInterval(function() {
-      fetch("{% url 'cashier_summary' %}", {
-          headers: {
-              'X-Requested-With': 'XMLHttpRequest'  // 确保 Django 能识别这是 AJAX 请求 / Assurer que Django reconnaisse qu'il s'agit d'une requête AJAX
-          }
-      })
-      .then(response => response.json())
-      .then(orders => {
-          let tableBody = document.querySelector('.orders-table tbody');
-          let newHtml = '';
-          orders.forEach(order => {
-              newHtml += `<tr>
-                  <td>${order.id}</td>
-                  <td>${order.updated_at}</td>
-                  <td>${order.table}</td>
-                  <td>${order.adults}</td>
-                  <td>${order.kids}</td>
-                  <td>${order.toddlers}</td>
-                  <td>${order.items.map(item => `${item.name} x ${item.quantity}`).join('<br>')}</td>
-                  <td>${order.total_price.toFixed(2)}</td>
-                  <td>${order.username}</td>
-              </tr>`;
-          });
-          tableBody.innerHTML = newHtml; // 只更新表格体 / Mise à jour du corps du tableau uniquement
-      });
-  }, 30000);  // 每10秒更新一次
+function delete_item(id){
+    fetch("{% url 'cashier_summary' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json', 
+            'X-CSRFToken': '{{ csrf_token }}' // 添加CSRF令牌
+          },
+        body:JSON.stringify({ id_delete: id })
+      }).then(response => {
+        if (response.ok) {
+            // 请求成功，执行重定向
+            window.location.href = "{% url 'cashier_summary' %}";
+        } else {
+            // 请求失败，给出相应的提示或处理其他错误情况
+            console.error('网络请求错误');
+        }
+    })
+    .catch(error => {
+        // 捕获其他错误
+        console.error('发生错误:', error);
+    });
+}
+
+
 </script>
 
 {% endblock %}
