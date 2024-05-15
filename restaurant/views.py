@@ -17,6 +17,46 @@ from django.contrib.auth import login
 from .forms import RegisterForm
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from datetime import datetime
+
+def get_pricing(adults, kids, toddlers):
+    now = datetime.now()
+    current_hour = now.hour
+    current_weekday = now.weekday()
+
+    # 设置午餐和晚餐的时间段
+    lunch_time = (12, 15)  # 从12点到15点
+    dinner_time = (18, 23)  # 从18点到23点
+    weekend = (5, 6)  # 星期六和星期日
+
+    # 默认价格
+    prices = {
+        'adults': 15.8,
+        'kids': 12.8,
+        'toddlers': 9.8
+    }
+
+    # 检查是否是晚餐时间或周末
+    if (lunch_time[0] <= current_hour < lunch_time[1]) and current_weekday not in weekend:
+        prices = {
+            'adults': 15.8,
+            'kids': 12.8,
+            'toddlers': 9.8
+        }
+    elif (dinner_time[0] <= current_hour < dinner_time[1]) or current_weekday in weekend:
+        prices = {
+            'adults': 22.8,
+            'kids': 17.8,
+            'toddlers': 9.8
+        }
+
+    # 计算总价格
+    total_price = (prices['adults'] * float(adults) +
+                   prices['kids'] * float(kids) +
+                   prices['toddlers'] * float(toddlers))
+
+    return total_price
+
 
 def is_superuser(user):
     return user.is_superuser  # 可以根据需要扩展更多的条件，例如检查用户是否属于某个特定组
@@ -47,7 +87,7 @@ def register(request):
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def send_to_printer(data):
-    printer_ip = '192.168.1.100'
+    printer_ip = '192.168.1.101'
     printer_port = 9100
     cut_paper_command = b'\x1d\x56\x41\x03'  # ESC/POS 命令用于切纸
     font_size_command = b'\x1d\x21\x11'  # 设置字体为双宽双高
@@ -132,7 +172,7 @@ def add_order_item(request):
                 order_active.toddlers = toddlers
                 order_active.user = request.user
                 order_active.save()
-                messages.success(request, '订单已成功更新。')
+                messages.success(request, 'Commande mise à jour avec succès。')
                 boisson_ordered = Order_item.objects.filter(order=order_active).all()
                 for b in boissons:
                     quantity = form.cleaned_data.get(f'boisson_{b.id}')
@@ -145,13 +185,15 @@ def add_order_item(request):
                         
                         initial_boisson[f'boisson_{b.id}']=quantity
                     else:
-                        b.quantity=0
+                        order_item = Order_item.objects.filter(order=order_active, boisson=b).first()
+                        if order_item:
+                            order_item.delete()  # 正确的删除方法
                 prix_person=15.8*float(adults)+12.8*float(kids)+9.8*float(toddlers)
                 order_active.prix=prix_person+float(prix_boisson)
                 order_active.save()
                 # 生成打印数据并发送到打印机
-                #print_data = prepare_print_data(order_active, boissons, boisson_ordered)
-                #send_to_printer(print_data)
+                print_data = prepare_print_data(order_active, boissons, boisson_ordered)
+                send_to_printer(print_data)
                 new_form = New_order_form(initial=initial_boisson)
                 return render(request, 'restaurant/add_order_item.html', {
                     'adults': order_active.adults,
@@ -167,7 +209,7 @@ def add_order_item(request):
                 new_order = Order(adults=adults, kids=kids, toddlers=toddlers, table=table_this)
                 new_order.user = request.user
                 new_order.save()
-                messages.success(request, '新订单已成功创建。')
+                messages.success(request, 'La nouvelle commande a été créée avec succès。')
 
                 for b in boissons:
                     quantity = form.cleaned_data.get(f'boisson_{b.id}')
@@ -182,8 +224,8 @@ def add_order_item(request):
                         initial_boisson[f'boisson_{b.id}']=0
                 # 生成打印数据并发送到打印机
                 new_boisson_ordered = Order_item.objects.filter(order=new_order).all()
-                #print_data = prepare_print_data(new_order, boissons, new_boisson_ordered)
-                #send_to_printer(print_data)
+                print_data = prepare_print_data(new_order, boissons, new_boisson_ordered)
+                send_to_printer(print_data)
                 prix_person=15.8*float(adults)+12.8*float(kids)+9.8*float(toddlers)
                 new_order.prix=prix_person+float(prix_boisson)
                 new_order.save()
@@ -316,8 +358,8 @@ def checkout_and_reset_table(request, table_id):
         order.save()
 
         # 生成打印数据并发送到打印机
-        print_data = prepare_print_data(order, boissons, order_items)
-        send_to_printer(print_data)
+        #print_data = prepare_print_data(order, boissons, order_items)
+        #send_to_printer(print_data)
 
         messages.success(request, "订单已成功结账并已准备迎接新客人La commande a été validée avec succès et est prête à accueillir de nouveaux invités")
     else:
