@@ -10,6 +10,7 @@ from decimal import Decimal
 import logging
 import socket,json
 
+from datetime import datetime
 from .models import Table, Order, Order_item, Boisson, Category
 from .forms import New_order_form, login_form
 from django.shortcuts import render, redirect
@@ -23,8 +24,16 @@ def get_pricing(adults, kids, toddlers):
     now = datetime.now()
     current_hour = now.hour
     current_weekday = now.weekday()
-
-    # 设置午餐和晚餐的时间段
+    current_date = datetime.now().date()
+    current_year = datetime.now().year
+    vacance=[datetime(current_year, 4, 1).date(), datetime(current_year, 5, 1).date(),
+            datetime(current_year, 5, 8).date(), datetime(current_year, 5, 9).date(),
+            datetime(current_year, 5, 20).date(), datetime(current_year, 7, 14).date(),
+            datetime(current_year, 8, 15).date(), datetime(current_year, 11, 1).date(),
+            datetime(current_year, 11, 11).date(), datetime(current_year, 12, 25).date(),
+            ]
+    
+    # 设置午餐和晚餐的时间段    
     lunch_time = (12, 15)  # 从12点到15点
     dinner_time = (18, 23)  # 从18点到23点
     weekend = (5, 6)  # 星期六和星期日
@@ -43,7 +52,7 @@ def get_pricing(adults, kids, toddlers):
             'kids': 12.8,
             'toddlers': 9.8
         }
-    elif (dinner_time[0] <= current_hour < dinner_time[1]) or current_weekday in weekend:
+    elif (dinner_time[0] <= current_hour < dinner_time[1]) or current_weekday in weekend or current_date in vacance:
         prices = {
             'adults': 22.8,
             'kids': 17.8,
@@ -190,7 +199,7 @@ def add_order_item(request):
                         order_item = Order_item.objects.filter(order=order_active, boisson=b).first()
                         if order_item:
                             order_item.delete()  # 正确的删除方法
-                prix_person=15.8*float(adults)+12.8*float(kids)+9.8*float(toddlers)
+                prix_person=get_pricing(adults,kids,toddlers)
                 order_active.prix=prix_person+float(prix_boisson)
                 order_active.save()
                 # 生成打印数据并发送到打印机
@@ -228,7 +237,7 @@ def add_order_item(request):
                 new_boisson_ordered = Order_item.objects.filter(order=new_order).all()
                 print_data = prepare_print_data(new_order, boissons, new_boisson_ordered)
                 send_to_printer(print_data)
-                prix_person=15.8*float(adults)+12.8*float(kids)+9.8*float(toddlers)
+                prix_person=get_pricing(adults,kids,toddlers)
                 new_order.prix=prix_person+float(prix_boisson)
                 new_order.save()
                 new_form = New_order_form(initial=initial_boisson)
