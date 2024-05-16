@@ -113,24 +113,27 @@
             <div class="people-group">
                 <h3>Adultes:</h3>
                 <div class="controls">
-                    <span id="display_adults">{{ adults }}</span>
+                    <span>{{ adults }}</span>
                     <button type="button" class="button" onclick="increment('adults')">+</button>
+                    <span id="display_adults">0</span>
                     <button type="button" class="button" onclick="decrement('adults')">-</button>
                 </div>
             </div>
             <div class="people-group">
                 <h3>Grands enfants:</h3>
                 <div class="controls">
-                    <span id="display_kids">{{ kids }}</span>
+                    <span>{{ kids }}</span>
                     <button type="button" class="button" onclick="increment('kids')">+</button>
+                    <span id="display_kids">0</span>
                     <button type="button" class="button" onclick="decrement('kids')">-</button>
                 </div>
             </div>
             <div class="people-group">
                 <h3>Petits enfants:</h3>
                 <div class="controls">
-                    <span id="display_toddlers">{{ toddlers }}</span>
+                    <span>{{ toddlers }}</span>
                     <button type="button" class="button" onclick="increment('toddlers')">+</button>
+                    <span id="display_toddlers">0</span>
                     <button type="button" class="button" onclick="decrement('toddlers')">-</button>
                 </div>
             </div>
@@ -149,8 +152,9 @@
                     {% if boisson.category.name == category.name %}
                     <li class="drink-item">
                         {{ boisson.name }}
-                        <span id="display_boisson_{{ boisson.id }}">{{ boisson.quantity }}</span>
+                        <span>{{ boisson.quantity }}</span>
                         <button type="button" class="button" onclick="increment('boisson_{{ boisson.id }}')">+</button>
+                        <span id="display_boisson_{{ boisson.id }}">0</span>
                         <button type="button" class="button" onclick="decrement('boisson_{{ boisson.id }}')">-</button>
                     </li>
                     {% endif %}

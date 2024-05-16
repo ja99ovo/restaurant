@@ -10,6 +10,10 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ("username", "password1", "password2")
 
+
+class Delete_item(forms.Form):
+    id_delete=forms.IntegerField(label='id_delete')
+
 class New_order_form(forms.Form):
     created_at = models.DateTimeField(auto_now_add=True)  # 添加时间戳字段
     adults = forms.IntegerField(label='adults', initial=0, widget=forms.HiddenInput())
@@ -26,8 +30,7 @@ class New_order_form(forms.Form):
                     initial=0,
                     widget=forms.HiddenInput(),
                     required=False
-                )
-
+                )            
 
 
 class login_form(AuthenticationForm):

@@ -15,4 +15,6 @@ urlpatterns = [
     path('clear_all_orders/', views.clear_all_orders, name='clear_all_orders'),
     path('cashier_summary/', views.cashier_summary, name='cashier_summary'),
     path('table/<int:table_id>/checkout/', views.checkout_and_reset_table, name='checkout_and_reset_table'),
+    path('test_webhook/',views.test_webhook,name="test_webhook"),
+    path('show_books/',views.show_books,name='show_books'),
 ]

@@ -18,6 +18,8 @@ from .forms import RegisterForm
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+
 def is_superuser(user):
     return user.is_superuser  # 可以根据需要扩展更多的条件，例如检查用户是否属于某个特定组
 
@@ -325,3 +327,20 @@ def checkout_and_reset_table(request, table_id):
 
     return redirect('table_list')
 
+@csrf_exempt
+def test_webhook(request):
+    if request.method == 'GET':
+        return JsonResponse({'success': True})
+    else:
+        return JsonResponse({'success': True})
+
+from django.views.decorators.http import require_http_methods
+@require_http_methods(["GET"])
+def show_books(request):
+    response={}
+    try:
+        response['a']='a'
+        response['b']='b'
+    except Exception as e:
+        pass
+    return JsonResponse(response)
