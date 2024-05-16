@@ -192,11 +192,18 @@
             function decrement(id) {
                 var input = document.getElementById("id_" + id);
                 var display_input = document.getElementById("display_" + id);
-                if (parseInt(input.value) > quantity_min) {
+                if (parseInt(input.value) > 0) {
                     input.value = parseInt(input.value) - 1;
                     display_input.innerText = parseInt(display_input.innerText) - 1;
+
+                    // 如果数量减少到0，发送删除请求或更新请求
+                    if (parseInt(input.value) === 0) {
+                        // 这里可以调用一个函数来处理删除逻辑，例如发送AJAX请求
+                        deleteItem(id);  // 假设这个函数处理删除逻辑
+                    }
                 }
             }
+
 
             function toggleSection(categoryName) {
                 var section = document.getElementById('category_' + categoryName);
@@ -208,13 +215,16 @@
             }
 
             function displayTime() {
-                var now = new Date();
-                var timeString = now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
+                var now = new Date().toLocaleString("en-US", {timeZone: "Europe/Paris"});
+                var parisTime = new Date(now);
+                var timeString = parisTime.getHours() + ':' + parisTime.getMinutes() + ':' + parisTime.getSeconds();
                 document.getElementById("systemTime").value = timeString;
             }
 
+
             setInterval(displayTime, 1000);  /* 更新时间每秒 */
             displayTime();  /* 初始化显示时间 */
+
         </script>
     </div>
 </body>

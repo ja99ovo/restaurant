@@ -27,7 +27,7 @@
               <th>小孩 / Enfants</th>
               <th>幼儿 / Petits enfants</th>
               <th>饮品详情 / Détails des boissons</th>
-              <th>总价 / Prix total</th>
+              <th class="total-price">总价 / Prix total</th>
               <th>用户 / Utilisateur</th> <!-- 新增的列显示用户 -->
           </tr>
       </thead>
@@ -45,7 +45,7 @@
                 {{ item.boisson.name }} x {{ item.quantity }}  <button onclick="delete_item('{{item.id}}')">delete</button>  <br>
                 {% endfor %}
             </td>
-            <td>{{ order.prix }}</td>
+            <td class="total-price">{{ order.prix }}</td>
             <td>
               {% if order.user %}
                   {{ order.user.username }}
@@ -75,7 +75,7 @@ function delete_item(id){
             window.location.href = "{% url 'cashier_summary' %}";
         } else {
             // 请求失败，给出相应的提示或处理其他错误情况
-            console.error('网络请求错误');
+            console.error('Erreur de requête réseau');
         }
     })
     .catch(error => {
@@ -84,6 +84,10 @@ function delete_item(id){
     });
 }
 
+// 设置每5秒自动刷新页面
+setInterval(function() {
+    window.location.reload();
+}, 30000);
 
 </script>
 
