@@ -46,13 +46,7 @@ def get_pricing(adults, kids, toddlers):
     }
 
     # 检查是否是晚餐时间或周末
-    if (lunch_time[0] <= current_hour < lunch_time[1]) and current_weekday not in weekend:
-        prices = {
-            'adults': 15.8,
-            'kids': 12.8,
-            'toddlers': 9.8
-        }
-    elif (dinner_time[0] <= current_hour < dinner_time[1]) or current_weekday in weekend or current_date in vacance:
+    if (dinner_time[0] <= current_hour < dinner_time[1]) or current_weekday in weekend or current_date in vacance:
         prices = {
             'adults': 22.8,
             'kids': 17.8,
